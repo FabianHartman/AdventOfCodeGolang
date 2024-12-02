@@ -11,10 +11,10 @@ import (
 
 var inputPath2 string = "inputs/day2.txt"
 
-func Day2a() error {
+func input() ([][]int, error) {
 	file, err := os.Open(inputPath2)
 	if err != nil {
-		return fmt.Errorf("error opening file: %s", err)
+		return nil, fmt.Errorf("error opening file: %s", err)
 	}
 
 	defer file.Close()
@@ -28,7 +28,7 @@ func Day2a() error {
 		for _, str := range strings.Split(scanner.Text(), " ") {
 			num, err := strconv.Atoi(str)
 			if err != nil {
-				return fmt.Errorf("error converting %s to int: %s", str, err)
+				return nil, fmt.Errorf("error converting %s to int: %s", str, err)
 			}
 
 			nums = append(nums, num)
@@ -37,117 +37,94 @@ func Day2a() error {
 		reports = append(reports, nums)
 	}
 
+	return reports, nil
+}
+
+func isValid(report []int) bool {
+	value := report[1]
+	ascending := report[1] > report[0]
+
+	startingDifference := math.Abs(float64(report[1] - report[0]))
+
+	if startingDifference > 3 || startingDifference < 1 {
+		return false
+	}
+
+	for i, num := range report[2:] {
+		if ascending && num > value && num <= value+3 {
+			value = num
+		} else if (!ascending) && (num < value && num >= value-3) {
+			value = num
+		} else {
+			return false
+		}
+		if i == len(report)-1-2 {
+			return true
+		}
+	}
+
+	return false
+}
+
+func generateMutations(report []int) [][]int {
+	mutations := [][]int{}
+
+	for i := range report {
+		mutatedReport := []int{}
+		if i == 0 {
+			mutatedReport = report[1:]
+		} else {
+			mutatedReport = append(mutatedReport, report[:i]...)
+			mutatedReport = append(mutatedReport, report[i+1:]...)
+		}
+
+		mutations = append(mutations, mutatedReport)
+	}
+
+	return mutations
+}
+
+func Day2a() error {
+	reports, err := input()
+	if err != nil {
+		return err
+	}
+
 	total := 0
 
 	for _, report := range reports {
-		value := report[1]
-		ascending := report[1] > report[0]
-
-		startingDifference := math.Abs(float64(report[1] - report[0]))
-
-		if startingDifference > 3 || startingDifference < 1 {
-			continue
-		}
-
-		for i, num := range report[2:] {
-			if ascending && num > value && num <= value+3 {
-				value = num
-			} else if (!ascending) && (num < value && num >= value-3) {
-				value = num
-			} else {
-				break
-			}
-			if i == len(report)-1-2 {
-				total++
-				fmt.Println(report)
-			}
+		if isValid(report) {
+			total++
 		}
 	}
+
 	fmt.Println("Day 2a:", total)
 
 	return nil
 }
 
 func Day2b() error {
-	file, err := os.Open(inputPath2)
+	reports, err := input()
 	if err != nil {
-		return fmt.Errorf("error opening file: %s", err)
-	}
-
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	var reports [][]int
-
-	for scanner.Scan() {
-		nums := []int{}
-		for _, str := range strings.Split(scanner.Text(), " ") {
-			num, err := strconv.Atoi(str)
-			if err != nil {
-				return fmt.Errorf("error converting %s to int: %s", str, err)
-			}
-
-			nums = append(nums, num)
-		}
-
-		reports = append(reports, nums)
+		return err
 	}
 
 	total := 0
 
 	for _, report := range reports {
-		unsafeCount := 0
-
-		var ascending bool
-
-		value := report[1]
-		if report[1] != report[0] {
-			ascending = report[1] > report[0]
-		} else {
-			ascending = report[2] > report[1]
-			unsafeCount++
-		}
-
-		startingDifference := math.Abs(float64(report[1] - report[0]))
-
-		if startingDifference > 3 || startingDifference < 1 {
+		if isValid(report) {
+			total++
 			continue
 		}
-
-		for i, num := range report[1:] {
-			if num > value {
-				if !ascending {
-					unsafeCount++
-				} else {
-					if !(num > value && num <= value+3) {
-						unsafeCount++
-					}
-				}
-				value = num
-				ascending = true
-			} else if num == value {
-				unsafeCount++
-			} else if num < value {
-				if ascending {
-					unsafeCount++
-				} else {
-					if !(num < value && num >= value-3) {
-						unsafeCount++
-					}
-				}
-				value = num
-				ascending = false
-			}
-			if unsafeCount > 2 {
-				continue
-			}
-			if i == len(report)-1-1 {
+		for _, mutatedReport := range generateMutations(report) {
+			if isValid(mutatedReport) {
 				total++
-				fmt.Println(report)
+				break
 			}
 		}
+
 	}
+
 	fmt.Println("Day 2b:", total)
 
 	return nil
