@@ -10,10 +10,10 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/day1.txt"
+var inputPath1 string = "inputs/day1.txt"
 
 func Day1a() error {
-	file, err := os.Open(inputPath)
+	file, err := os.Open(inputPath1)
 	if err != nil {
 		return fmt.Errorf("error opening file: %s", err)
 	}
@@ -54,7 +54,7 @@ func Day1a() error {
 }
 
 func Day1b() error {
-	file, err := os.Open(inputPath)
+	file, err := os.Open(inputPath1)
 	if err != nil {
 		return fmt.Errorf("error opening file: %s", err)
 	}
