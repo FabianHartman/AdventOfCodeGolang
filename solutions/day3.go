@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -137,6 +138,124 @@ func Day3a() error {
 	}
 
 	fmt.Println("day3a:", total)
+
+	return nil
+}
+
+func Day3b() error {
+	input, err := inputDay3()
+	if err != nil {
+		return err
+	}
+
+	var total int64
+
+	lastDo := -1
+	lastDont := -2
+
+	for _, row := range input {
+		status := Status{
+			MulProgress:          "",
+			FirstNumber:          "",
+			SecondNumber:         "",
+			FirstNumberCompleted: false,
+			MulOpened:            false,
+		}
+
+		numbers := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}
+		mulString := []string{"m", "u", "l"}
+
+		for i, char := range row {
+			if containsString(numbers, string(char)) {
+				if !status.FirstNumberCompleted && status.MulOpened {
+					if status.MulProgress != "mul" {
+						status.Reset()
+					} else {
+						status.FirstNumber += string(char)
+					}
+				} else if status.MulOpened {
+					status.SecondNumber += string(char)
+				} else {
+					status.Reset()
+				}
+			} else if char == '(' {
+				if status.MulOpened {
+					status.Reset()
+				} else {
+					if status.MulProgress == "mul" {
+						status.MulOpened = true
+					} else {
+						status.Reset()
+					}
+				}
+			} else if char == ',' {
+				if 1 <= len(status.FirstNumber) && len(status.FirstNumber) <= 3 {
+					status.FirstNumberCompleted = true
+				} else {
+					status.Reset()
+				}
+			} else if char == ')' {
+				if status.MulOpened {
+					if 1 <= len(status.FirstNumber) && len(status.FirstNumber) <= 3 && 1 <= len(status.SecondNumber) && len(status.SecondNumber) <= 3 {
+						first, _ := strconv.ParseInt(status.FirstNumber, 10, 64)
+						second, _ := strconv.ParseInt(status.SecondNumber, 10, 64)
+
+						doPattern := regexp.MustCompile(`do\(\)`)
+						dontPattern := regexp.MustCompile(`don't\(\)`)
+
+						beforeInput := row[:i]
+
+						dos := []int{}
+						for _, i := range doPattern.FindAllStringIndex(beforeInput, len(beforeInput)-1) {
+							dos = append(dos, i[1])
+						}
+
+						donts := []int{}
+						for _, i := range dontPattern.FindAllStringIndex(beforeInput, len(beforeInput)-1) {
+							donts = append(donts, i[1])
+						}
+
+						do := -1
+						dont := -2
+
+						if len(dos) > 0 {
+							do = dos[len(dos)-1]
+						}
+						if len(donts) > 0 {
+							dont = donts[len(donts)-1]
+						}
+
+						if do == -1 && dont == -2 {
+							do = lastDo
+							dont = lastDont
+						}
+
+						lastDo = do
+						lastDont = dont
+
+						if do > dont {
+							total += first * second
+						}
+
+						status.Reset()
+					}
+				}
+			} else if containsString(mulString, string(char)) {
+				if !containsString(strings.Split(status.MulProgress, ""), string(char)) {
+					status.MulProgress += string(char)
+				} else {
+					status.Reset()
+					if char == 'm' {
+						status.MulProgress += string(char)
+					}
+				}
+			} else {
+				status.Reset()
+			}
+		}
+	}
+
+	fmt.Println("day3b:", total)
 
 	return nil
 }
