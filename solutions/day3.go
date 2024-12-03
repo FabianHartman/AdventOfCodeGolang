@@ -1,0 +1,142 @@
+package solutions
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
+var inputPath3 string = "inputs/day3.txt"
+
+type Status struct {
+	MulProgress          string
+	FirstNumber          string
+	SecondNumber         string
+	FirstNumberCompleted bool
+	MulOpened            bool
+}
+
+func (s *Status) Reset() {
+	s.MulOpened = false
+	s.MulProgress = ""
+	s.FirstNumberCompleted = false
+	s.FirstNumber = ""
+	s.SecondNumber = ""
+}
+
+func (s *Status) String() string {
+	return fmt.Sprintf("MulProgress: %s, FirstNumber: %s, SecondNumber: %s, FirstNumberCompleted: %v, MulOpened: %v",
+		s.MulProgress, s.FirstNumber, s.SecondNumber, s.FirstNumberCompleted, s.MulOpened)
+}
+
+func containsString(slice []string, string string) bool {
+	for _, s := range slice {
+		if s == string {
+			return true
+		}
+	}
+
+	return false
+}
+
+func inputDay3() ([]string, error) {
+	file, err := os.Open(inputPath3)
+	if err != nil {
+		return nil, fmt.Errorf("error opening file: %s", err)
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	rows := []string{}
+
+	for scanner.Scan() {
+		rows = append(rows, scanner.Text())
+	}
+
+	return rows, nil
+}
+
+func Day3a() error {
+	input, err := inputDay3()
+	if err != nil {
+		return err
+	}
+
+	var total int64
+
+	for _, row := range input {
+		status := Status{
+			MulProgress:          "",
+			FirstNumber:          "",
+			SecondNumber:         "",
+			FirstNumberCompleted: false,
+			MulOpened:            false,
+		}
+
+		numbers := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}
+		mulString := []string{"m", "u", "l"}
+
+		for _, char := range row {
+			if containsString(numbers, string(char)) {
+				if !status.FirstNumberCompleted && status.MulOpened {
+					if status.MulProgress != "mul" {
+						status.Reset()
+					} else {
+						status.FirstNumber += string(char)
+					}
+				} else if status.MulOpened {
+					status.SecondNumber += string(char)
+				} else {
+					status.Reset()
+				}
+			} else if char == '(' {
+				if status.MulOpened {
+					status.Reset()
+				} else {
+					if status.MulProgress == "mul" {
+						status.MulOpened = true
+					} else {
+						status.Reset()
+					}
+				}
+			} else if char == ',' {
+				if 1 <= len(status.FirstNumber) && len(status.FirstNumber) <= 3 {
+					status.FirstNumberCompleted = true
+				} else {
+					status.Reset()
+				}
+			} else if char == ')' {
+				if status.MulOpened {
+					if 1 <= len(status.FirstNumber) && len(status.FirstNumber) <= 3 && 1 <= len(status.SecondNumber) && len(status.SecondNumber) <= 3 {
+						first, _ := strconv.ParseInt(status.FirstNumber, 10, 64)
+						second, _ := strconv.ParseInt(status.SecondNumber, 10, 64)
+
+						total += first * second
+
+						status.Reset()
+					}
+				}
+			} else if containsString(mulString, string(char)) {
+				if !containsString(strings.Split(status.MulProgress, ""), string(char)) {
+					status.MulProgress += string(char)
+				} else {
+					status.Reset()
+					if char == 'm' {
+						status.MulProgress += string(char)
+					}
+				}
+			} else {
+				status.Reset()
+			}
+		}
+		status.Reset()
+	}
+
+	fmt.Println("day3a:", total)
+
+	return nil
+}

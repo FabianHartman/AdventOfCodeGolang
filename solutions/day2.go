@@ -11,7 +11,7 @@ import (
 
 var inputPath2 string = "inputs/day2.txt"
 
-func input() ([][]int, error) {
+func inputDay2() ([][]int, error) {
 	file, err := os.Open(inputPath2)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
@@ -85,7 +85,7 @@ func generateMutations(report []int) [][]int {
 }
 
 func Day2a() error {
-	reports, err := input()
+	reports, err := inputDay2()
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func Day2a() error {
 }
 
 func Day2b() error {
-	reports, err := input()
+	reports, err := inputDay2()
 	if err != nil {
 		return err
 	}
