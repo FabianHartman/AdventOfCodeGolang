@@ -117,3 +117,82 @@ func Day4a() error {
 
 	return nil
 }
+
+type Coord struct {
+	Col int
+	Row int
+}
+
+func (c *Coord) getLeftDiagonalCoords() []Coord {
+	coords := []Coord{}
+
+	coords = append(coords, Coord{c.Col - 1, c.Row - 1})
+	coords = append(coords, Coord{c.Col + 1, c.Row + 1})
+
+	return coords
+}
+
+func (c *Coord) getRightDiagonalCoords() []Coord {
+	coords := []Coord{}
+
+	coords = append(coords, Coord{c.Col + 1, c.Row - 1})
+	coords = append(coords, Coord{c.Col - 1, c.Row + 1})
+
+	return coords
+}
+
+func findACoords(input [][]string) []Coord {
+	ACoords := []Coord{}
+
+	for row := 1; row < len(input)-1; row++ {
+		for col := 1; col < len(input[row])-1; col++ {
+			if input[row][col] == "A" {
+				ACoords = append(ACoords, Coord{col, row})
+			}
+		}
+	}
+
+	return ACoords
+}
+
+func Day4b() error {
+	input, err := inputDay4()
+	if err != nil {
+		return err
+	}
+
+	total := 0
+	ACoords := findACoords(input)
+
+	for _, aCoord := range ACoords {
+		leftCorrect, rightCorrect := false, false
+
+		leftString := ""
+		for _, coord := range aCoord.getLeftDiagonalCoords() {
+			leftString += input[coord.Row][coord.Col]
+		}
+		if strings.Contains(leftString, "M") {
+			if strings.Contains(leftString, "S") {
+				leftCorrect = true
+			}
+		}
+
+		rightString := ""
+		for _, coord := range aCoord.getRightDiagonalCoords() {
+			rightString += input[coord.Row][coord.Col]
+		}
+		if strings.Contains(rightString, "M") {
+			if strings.Contains(rightString, "S") {
+				rightCorrect = true
+			}
+		}
+
+		if leftCorrect && rightCorrect {
+			total++
+		}
+	}
+
+	fmt.Println("day 4b:", total)
+
+	return nil
+}
