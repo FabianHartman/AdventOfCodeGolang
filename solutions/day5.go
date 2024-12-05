@@ -160,6 +160,7 @@ func Day5b() error {
 
 	for _, update := range updates {
 		modified := false
+
 		for true {
 			correct, failingRule := update.isCorrect(rules)
 			if correct {
@@ -172,7 +173,6 @@ func Day5b() error {
 				update, err = update.fixFailingRule(failingRule)
 			}
 		}
-
 	}
 
 	fmt.Println("day 5b:", total)
