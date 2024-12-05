@@ -31,7 +31,7 @@ func (u *Update) middleValue() int {
 	return (*u)[len(*u)/2]
 }
 
-func (u *Update) isCorrect(rules []Rule) bool {
+func (u *Update) isCorrect(rules []Rule) (bool, *Rule) {
 	for _, rule := range rules {
 		firstindex, err := u.findIndex(rule.First)
 		if err != nil {
@@ -44,11 +44,38 @@ func (u *Update) isCorrect(rules []Rule) bool {
 		}
 
 		if firstindex > secondIndex {
-			return false
+			return false, &rule
 		}
 	}
 
-	return true
+	return true, nil
+}
+
+func (u *Update) fixFailingRule(rule *Rule) (Update, error) {
+	result := make(Update, len(*u))
+	copy(result, *u)
+
+	firstIndex, err := result.findIndex(rule.First)
+	if err != nil {
+		return nil, err
+	}
+
+	secondIndex, err := result.findIndex(rule.Second)
+	if err != nil {
+		return nil, err
+	}
+
+	if firstIndex > secondIndex {
+		result = append(result[:secondIndex], result[secondIndex+1:]...)
+
+		if firstIndex > secondIndex {
+			firstIndex--
+		}
+
+		result = append(result[:firstIndex+1], append([]int{rule.Second}, result[firstIndex+1:]...)...)
+	}
+
+	return result, nil
 }
 
 func inputDay5() ([]Rule, []Update, error) {
@@ -113,12 +140,42 @@ func Day5a() error {
 	total := 0
 
 	for _, update := range updates {
-		if update.isCorrect(rules) {
+		if correct, _ := update.isCorrect(rules); correct {
 			total += update.middleValue()
 		}
 	}
 
 	fmt.Println("day 5a:", total)
+
+	return nil
+}
+
+func Day5b() error {
+	rules, updates, err := inputDay5()
+	if err != nil {
+		return err
+	}
+
+	total := 0
+
+	for _, update := range updates {
+		modified := false
+		for true {
+			correct, failingRule := update.isCorrect(rules)
+			if correct {
+				if modified {
+					total += update.middleValue()
+				}
+				break
+			} else {
+				modified = true
+				update, err = update.fixFailingRule(failingRule)
+			}
+		}
+
+	}
+
+	fmt.Println("day 5b:", total)
 
 	return nil
 }
