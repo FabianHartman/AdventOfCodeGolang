@@ -1,0 +1,124 @@
+package solutions
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
+var inputPath5 string = "inputs/day5.txt"
+
+type Rule struct {
+	First  int
+	Second int
+}
+
+type Update []int
+
+func (u *Update) findIndex(num int) (int, error) {
+	for i, value := range *u {
+		if value == num {
+			return i, nil
+		}
+	}
+
+	return 0, fmt.Errorf("no index found for %d", num)
+}
+
+func (u *Update) middleValue() int {
+	return (*u)[len(*u)/2]
+}
+
+func (u *Update) isCorrect(rules []Rule) bool {
+	for _, rule := range rules {
+		firstindex, err := u.findIndex(rule.First)
+		if err != nil {
+			continue
+		}
+
+		secondIndex, err := u.findIndex(rule.Second)
+		if err != nil {
+			continue
+		}
+
+		if firstindex > secondIndex {
+			return false
+		}
+	}
+
+	return true
+}
+
+func inputDay5() ([]Rule, []Update, error) {
+	file, err := os.Open(inputPath5)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error opening file: %s", err)
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	rules := []Rule{}
+	updates := []Update{}
+
+	rulesFinished := false
+
+	for scanner.Scan() {
+		if scanner.Text() == "" {
+			rulesFinished = true
+			continue
+		}
+
+		if !rulesFinished {
+			ruleValues := strings.Split(scanner.Text(), "|")
+			first, err := strconv.Atoi(ruleValues[0])
+			if err != nil {
+				return nil, nil, err
+			}
+
+			second, err := strconv.Atoi(ruleValues[1])
+			if err != nil {
+				return nil, nil, err
+			}
+
+			rules = append(rules, Rule{First: first, Second: second})
+		} else {
+			updateValues := strings.Split(scanner.Text(), ",")
+			update := Update{}
+			for _, updateValue := range updateValues {
+				updateValueInt, err := strconv.Atoi(updateValue)
+				if err != nil {
+					return nil, nil, err
+				}
+
+				update = append(update, updateValueInt)
+			}
+
+			updates = append(updates, update)
+		}
+	}
+
+	return rules, updates, nil
+}
+
+func Day5a() error {
+	rules, updates, err := inputDay5()
+	if err != nil {
+		return err
+	}
+
+	total := 0
+
+	for _, update := range updates {
+		if update.isCorrect(rules) {
+			total += update.middleValue()
+		}
+	}
+
+	fmt.Println("day 5a:", total)
+
+	return nil
+}
