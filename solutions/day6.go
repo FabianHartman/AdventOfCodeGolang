@@ -8,7 +8,8 @@ import (
 )
 
 type Position struct {
-	Row, Col int
+	Row, Col  int
+	Direction string
 }
 
 type Map struct {
@@ -32,7 +33,7 @@ func (m *Map) isOnMap(position Position) bool {
 
 func (m *Map) findWalkOver(position *Position, direction string) ([]Position, bool) {
 	visitedLocations := []Position{}
-	walkingPosition := Position{position.Row, position.Col}
+	walkingPosition := Position{Row: position.Row, Col: position.Col}
 	for true {
 		switch direction {
 		case "up":
@@ -141,6 +142,81 @@ func Day6a() error {
 	}
 
 	fmt.Println("Day 6a:", len(uniquePositions))
+
+	return nil
+}
+
+func Day6b() error {
+	obstructionsMap, guardStartPosition, err := inputDay6()
+	if err != nil {
+		return err
+	}
+
+	direction := "up"
+	possibleNewObstructionPositions := map[Position]bool{}
+	currentGuardPosition := Position{Row: guardStartPosition.Row, Col: guardStartPosition.Col}
+
+	for true {
+		newPositions, finished := obstructionsMap.findWalkOver(&currentGuardPosition, direction)
+
+		for _, position := range newPositions {
+			possibleNewObstructionPositions[Position{Row: position.Row, Col: position.Col}] = true
+		}
+
+		currentGuardPosition = newPositions[len(newPositions)-1]
+
+		if finished {
+			break
+		}
+
+		direction, err = getNextDirection(direction)
+		if err != nil {
+			return err
+		}
+	}
+
+	total := 0
+
+	for possiblePosition, _ := range possibleNewObstructionPositions {
+		obstructionsMap.Obstructions = append(obstructionsMap.Obstructions, possiblePosition)
+		direction = "up"
+		currentGuardPosition := Position{Row: guardStartPosition.Row, Col: guardStartPosition.Col, Direction: direction}
+		uniquePositions := map[Position]bool{}
+
+		notFound := true
+
+		for notFound {
+			newPositions, finished := obstructionsMap.findWalkOver(&currentGuardPosition, direction)
+
+			if finished {
+				break
+			}
+
+			for _, position := range newPositions {
+				position.Direction = direction
+				if _, exists := uniquePositions[position]; exists {
+					total++
+					notFound = false
+					break
+				}
+
+				uniquePositions[Position{Row: position.Row, Col: position.Col, Direction: direction}] = true
+			}
+
+			if len(newPositions) > 0 {
+				currentGuardPosition = newPositions[len(newPositions)-1]
+			}
+
+			direction, err = getNextDirection(direction)
+			if err != nil {
+				return err
+			}
+		}
+
+		obstructionsMap.Obstructions = obstructionsMap.Obstructions[:len(obstructionsMap.Obstructions)-1]
+	}
+
+	fmt.Println("Day 6b:", total)
 
 	return nil
 }
