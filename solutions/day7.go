@@ -17,31 +17,58 @@ type Equation struct {
 
 type Operators []string
 
-func (e *Equation) possiblyValid() bool {
-	operatorCombinations := e.generateOperatorCombinations()
+func (e *Equation) possiblyValid(part int) (bool, error) {
+	var operatorCombinations []Operators
+
+	switch part {
+	case 1:
+		operatorCombinations = e.generateOperatorCombinationsPart1()
+	case 2:
+		operatorCombinations = e.generateOperatorCombinationsPart2()
+	default:
+		return false, fmt.Errorf("incorrect part " + strconv.Itoa(part))
+	}
+
 	for _, operatorCombination := range operatorCombinations {
-		if e.validOperators(operatorCombination) {
-			return true
+		valid, err := e.validOperators(operatorCombination)
+		if err != nil {
+			return false, err
+		}
+
+		if valid {
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 }
 
-func (e *Equation) validOperators(ops Operators) bool {
-	result := e.Numbers[0]
+func (e *Equation) validOperators(ops Operators) (bool, error) {
+	numbers := make([]int, len(e.Numbers))
+	copy(numbers, e.Numbers)
+	result := numbers[0]
+
 	for i, op := range ops {
-		if op == "*" {
-			result *= e.Numbers[i+1]
-		} else if op == "+" {
-			result += e.Numbers[i+1]
+		switch op {
+		case "*":
+			result *= numbers[i+1]
+		case "+":
+			result += numbers[i+1]
+		case "||":
+			var err error
+			result, err = strconv.Atoi(strconv.Itoa(result) + strconv.Itoa(numbers[i+1]))
+			if err != nil {
+				return false, err
+			}
+		default:
+			return false, fmt.Errorf("invalid operator %s", op)
 		}
 	}
 
-	return result == e.Result
+	return result == e.Result, nil
 }
 
-func (e *Equation) generateOperatorCombinations() []Operators {
+func (e *Equation) generateOperatorCombinationsPart1() []Operators {
 	totalCombinations := 1 << (len(e.Numbers) - 1)
 	combinations := make([]Operators, totalCombinations)
 
@@ -52,6 +79,38 @@ func (e *Equation) generateOperatorCombinations() []Operators {
 				opCombo = append(opCombo, "+")
 			} else {
 				opCombo = append(opCombo, "*")
+			}
+		}
+
+		combinations[i] = opCombo
+	}
+
+	return combinations
+}
+
+func (e *Equation) generateOperatorCombinationsPart2() []Operators {
+	totalCombinations := 1
+	for i := 0; i < len(e.Numbers)-1; i++ {
+		totalCombinations *= 3
+	}
+
+	combinations := make([]Operators, totalCombinations)
+
+	for i := 0; i < totalCombinations; i++ {
+		opCombo := Operators{}
+		for j := 0; j < len(e.Numbers)-1; j++ {
+			powerOfThree := 1
+			for k := 0; k < j; k++ {
+				powerOfThree *= 3
+			}
+
+			switch (i / powerOfThree) % 3 {
+			case 0:
+				opCombo = append(opCombo, "*")
+			case 1:
+				opCombo = append(opCombo, "+")
+			case 2:
+				opCombo = append(opCombo, "||")
 			}
 		}
 
@@ -106,12 +165,41 @@ func Day7a() error {
 	total := 0
 
 	for _, equation := range equations {
-		if equation.possiblyValid() {
+		valid, err := equation.possiblyValid(1)
+		if err != nil {
+			return err
+		}
+
+		if valid {
 			total += equation.Result
 		}
 	}
 
 	fmt.Println("Day 7a:", total)
+
+	return nil
+}
+
+func Day7b() error {
+	equations, err := inputDay7()
+	if err != nil {
+		return err
+	}
+
+	total := 0
+
+	for _, equation := range equations {
+		valid, err := equation.possiblyValid(2)
+		if err != nil {
+			return err
+		}
+
+		if valid {
+			total += equation.Result
+		}
+	}
+
+	fmt.Println("Day 7b:", total)
 
 	return nil
 }
