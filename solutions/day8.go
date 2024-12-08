@@ -20,7 +20,7 @@ type AntennaLocation struct {
 	Row, Col int
 }
 
-func (al *AntennaLocation) antinodeLocation(to *AntennaLocation) *AntennaLocation {
+func (al *AntennaLocation) antinodeLocationPart1(to *AntennaLocation) *AntennaLocation {
 	rowIncrement := to.Row - al.Row
 	colIncrement := to.Col - al.Col
 
@@ -29,7 +29,32 @@ func (al *AntennaLocation) antinodeLocation(to *AntennaLocation) *AntennaLocatio
 	return &antinode
 }
 
-func (am *AntennaMap) countUniqueAntinodeLocations() int {
+func (al *AntennaLocation) antinodeLocationPart2(to *AntennaLocation, NRows int, NCols int) []AntennaLocation {
+	rowIncrement := to.Row - al.Row
+	colIncrement := to.Col - al.Col
+
+	row := to.Row
+	col := to.Col
+
+	antinodes := []AntennaLocation{}
+	antinodes = append(antinodes, AntennaLocation{Row: row, Col: col})
+
+	for {
+		row += rowIncrement
+		col += colIncrement
+
+		if !(row < 0 || row >= NRows || col < 0 || col >= NCols) {
+			antinodes = append(antinodes, AntennaLocation{Row: row, Col: col})
+		} else {
+			break
+		}
+
+	}
+
+	return antinodes
+}
+
+func (am *AntennaMap) countUniqueAntinodeLocationsPart1() int {
 	uniqueLocations := map[AntennaLocation]bool{}
 
 	for _, frequency := range am.Antennas {
@@ -39,12 +64,35 @@ func (am *AntennaMap) countUniqueAntinodeLocations() int {
 					continue
 				}
 
-				antinode := fromAntenna.antinodeLocation(&toAntenna)
+				antinode := fromAntenna.antinodeLocationPart1(&toAntenna)
 				if antinode.Col < 0 || antinode.Col >= am.NCols || antinode.Row < 0 || antinode.Row >= am.NCols {
 					continue
 				}
 
 				uniqueLocations[*antinode] = true
+			}
+		}
+	}
+
+	return len(uniqueLocations)
+}
+
+func (am *AntennaMap) countUniqueAntinodeLocationsPart2() int {
+	uniqueLocations := map[AntennaLocation]bool{}
+
+	for _, frequency := range am.Antennas {
+		for fromI, fromAntenna := range frequency {
+			for toI, toAntenna := range frequency {
+				if fromI == toI {
+					continue
+				}
+
+				antinodes := fromAntenna.antinodeLocationPart2(&toAntenna, am.NRows, am.NCols)
+				for _, antinode := range antinodes {
+					if !(antinode.Col < 0 || antinode.Col >= am.NCols || antinode.Row < 0 || antinode.Row >= am.NCols) {
+						uniqueLocations[antinode] = true
+					}
+				}
 			}
 		}
 	}
@@ -85,7 +133,7 @@ func inputDay8() (*AntennaMap, error) {
 		}
 	}
 
-	antennaMap.NRows = rowI
+	antennaMap.NRows = rowI + 1
 
 	return &antennaMap, nil
 }
@@ -96,7 +144,18 @@ func Day8a() error {
 		return err
 	}
 
-	fmt.Println("Day 8a:", antennaMap.countUniqueAntinodeLocations())
+	fmt.Println("Day 8a:", antennaMap.countUniqueAntinodeLocationsPart1())
+
+	return nil
+}
+
+func Day8b() error {
+	antennaMap, err := inputDay8()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Day 8b:", antennaMap.countUniqueAntinodeLocationsPart2())
 
 	return nil
 }
