@@ -77,7 +77,7 @@ func createIdList(blockMap map[int]*Block) ([]int, int) {
 	return idList, length
 }
 
-func generateChecksum(idList []int, length int) []int {
+func generateChecksumPart1(idList []int, length int) []int {
 	result := []int{}
 	i := -1
 	reverseI := 1
@@ -114,13 +114,61 @@ func sumUpChecksum(checksum []int) int {
 	return total
 }
 
+func part2(originalBlockMap map[int]*Block) int {
+	originialStartingPositions := []int{}
+	length := 0
+
+	for k := range originalBlockMap {
+		originialStartingPositions = append(originialStartingPositions, k)
+	}
+
+	sort.Ints(originialStartingPositions)
+
+	startingPositions := make([]int, len(originialStartingPositions))
+	copy(startingPositions, originialStartingPositions)
+
+	blockMap := make(map[int]*Block)
+	for k, v := range originalBlockMap {
+		blockMap[k] = &Block{Length: v.Length, ID: k}
+	}
+
+	for i := len(originialStartingPositions) - 1; i >= 0; i-- {
+		startingPosition := originialStartingPositions[i]
+		start := originalBlockMap[startingPosition]
+		delete(blockMap, startingPosition)
+
+		lastEnd := -1
+		for _, position := range startingPositions {
+			if position-1-lastEnd > startingPosition+start.Length {
+				newStartingPosition := lastEnd + 1
+				blockMap[newStartingPosition] = start
+
+				lastEnd = newStartingPosition + start.Length - 1
+			}
+		}
+	}
+
+	return length
+}
+
 func Day9a() error {
 	blockMap, err := inputDay9()
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("day9a:", sumUpChecksum(generateChecksum(createIdList(blockMap))))
+	fmt.Println("day9a:", sumUpChecksum(generateChecksumPart1(createIdList(blockMap))))
+
+	return nil
+}
+
+func Day9b() error {
+	blockMap, err := inputDay9()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("day9b:", part2(blockMap))
 
 	return nil
 }
