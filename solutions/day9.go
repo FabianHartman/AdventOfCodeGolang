@@ -105,50 +105,68 @@ func generateChecksumPart1(idList []int, length int) []int {
 	return result
 }
 
-func sumUpChecksum(checksum []int) int {
-	total := 0
-	for i, v := range checksum {
-		total += i * v
-	}
+func generateChecksumPart2(idList []int, length int) []int {
+	result := make([]int, len(idList))
+	copy(result, idList)
+	index := len(idList) - 1
 
-	return total
-}
+	for index > 0 {
+		if result[index] != -1 {
+			number := result[index]
 
-func part2(originalBlockMap map[int]*Block) int {
-	originialStartingPositions := []int{}
-	length := 0
+			block := []int{}
+			block = append(block, index)
 
-	for k := range originalBlockMap {
-		originialStartingPositions = append(originialStartingPositions, k)
-	}
+			for {
+				index--
+				if index <= 0 {
+					break
+				}
 
-	sort.Ints(originialStartingPositions)
+				if number != result[index] {
+					break
+				}
 
-	startingPositions := make([]int, len(originialStartingPositions))
-	copy(startingPositions, originialStartingPositions)
-
-	blockMap := make(map[int]*Block)
-	for k, v := range originalBlockMap {
-		blockMap[k] = &Block{Length: v.Length, ID: k}
-	}
-
-	for i := len(originialStartingPositions) - 1; i >= 0; i-- {
-		startingPosition := originialStartingPositions[i]
-		start := originalBlockMap[startingPosition]
-		delete(blockMap, startingPosition)
-
-		lastEnd := -1
-		for _, position := range startingPositions {
-			if position-1-lastEnd > startingPosition+start.Length {
-				newStartingPosition := lastEnd + 1
-				blockMap[newStartingPosition] = start
-
-				lastEnd = newStartingPosition + start.Length - 1
+				block = append(block, index)
 			}
+
+			freePlaces := []int{}
+			for i := 0; i <= block[len(block)-1]; i++ {
+				if result[i] == -1 {
+					freePlaces = append(freePlaces, i)
+					if len(freePlaces) == len(block) {
+						for _, place := range freePlaces {
+							result[place] = number
+						}
+
+						for _, previousPlace := range block {
+							result[previousPlace] = -1
+						}
+
+						break
+					}
+				} else {
+					freePlaces = []int{}
+				}
+			}
+
+		} else {
+			index--
 		}
 	}
 
-	return length
+	return result
+}
+
+func sumUpChecksum(checksum []int) int {
+	total := 0
+	for i, v := range checksum {
+		if v != -1 {
+			total += i * v
+		}
+	}
+
+	return total
 }
 
 func Day9a() error {
@@ -168,7 +186,7 @@ func Day9b() error {
 		return err
 	}
 
-	fmt.Println("day9b:", part2(blockMap))
+	fmt.Println("day9b:", sumUpChecksum(generateChecksumPart2(createIdList(blockMap))))
 
 	return nil
 }
