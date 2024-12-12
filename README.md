@@ -1,1 +1,1 @@
-My solutions for Advent of Code 2024 in Go(lang)
+My solutions for Advent of Code in Go(lang)
