@@ -46,6 +46,7 @@ func (e *Equation) possiblyValid(part int) (bool, error) {
 func (e *Equation) validOperators(ops Operators) (bool, error) {
 	numbers := make([]int, len(e.Numbers))
 	copy(numbers, e.Numbers)
+
 	result := numbers[0]
 
 	for i, op := range ops {
