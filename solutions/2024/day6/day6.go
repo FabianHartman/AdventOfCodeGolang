@@ -1,4 +1,4 @@
-package solutions
+package day6
 
 import (
 	"bufio"
@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 )
+
+var inputPath string = "inputs/2024/day6.txt"
 
 type Position struct {
 	Row, Col  int
@@ -60,10 +62,8 @@ func (m *Map) findWalkOver(position *Position, direction string) ([]Position, bo
 	return visitedLocations, false
 }
 
-var inputPath6 string = "inputs/day6.txt"
-
-func inputDay6() (*Map, *Position, error) {
-	file, err := os.Open(inputPath6)
+func input() (*Map, *Position, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -112,8 +112,8 @@ func getNextDirection(direction string) (string, error) {
 	}
 }
 
-func Day6a() error {
-	obstructionsMap, guardPosition, err := inputDay6()
+func Part1() error {
+	obstructionsMap, guardPosition, err := input()
 	if err != nil {
 		return err
 	}
@@ -146,8 +146,8 @@ func Day6a() error {
 	return nil
 }
 
-func Day6b() error {
-	obstructionsMap, guardStartPosition, err := inputDay6()
+func Part2() error {
+	obstructionsMap, guardStartPosition, err := input()
 	if err != nil {
 		return err
 	}
@@ -177,7 +177,7 @@ func Day6b() error {
 
 	total := 0
 
-	for possiblePosition, _ := range possibleNewObstructionPositions {
+	for possiblePosition := range possibleNewObstructionPositions {
 		obstructionsMap.Obstructions = append(obstructionsMap.Obstructions, possiblePosition)
 		direction = "up"
 		currentGuardPosition := Position{Row: guardStartPosition.Row, Col: guardStartPosition.Col, Direction: direction}

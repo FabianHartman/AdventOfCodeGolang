@@ -1,4 +1,4 @@
-package solutions
+package day1
 
 import (
 	"bufio"
@@ -10,10 +10,10 @@ import (
 	"strings"
 )
 
-var inputPath1 string = "inputs/day1.txt"
+var inputPath string = "inputs/2024/day1.txt"
 
-func Day1a() error {
-	file, err := os.Open(inputPath1)
+func Part1() error {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return fmt.Errorf("error opening file: %s", err)
 	}
@@ -53,8 +53,8 @@ func Day1a() error {
 	return nil
 }
 
-func Day1b() error {
-	file, err := os.Open(inputPath1)
+func Part2() error {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return fmt.Errorf("error opening file: %s", err)
 	}

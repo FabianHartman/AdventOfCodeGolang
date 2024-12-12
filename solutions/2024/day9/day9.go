@@ -1,4 +1,4 @@
-package solutions
+package day9
 
 import (
 	"bufio"
@@ -9,15 +9,15 @@ import (
 	"strings"
 )
 
-var inputPath9 string = "inputs/day9.txt"
+var inputPath string = "inputs/2024/day9.txt"
 
 type Block struct {
 	Length int
 	ID     int
 }
 
-func inputDay9() (map[int]*Block, error) {
-	file, err := os.Open(inputPath9)
+func input() (map[int]*Block, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -169,8 +169,8 @@ func sumUpChecksum(checksum []int) int {
 	return total
 }
 
-func Day9a() error {
-	blockMap, err := inputDay9()
+func Part1() error {
+	blockMap, err := input()
 	if err != nil {
 		return err
 	}
@@ -180,8 +180,8 @@ func Day9a() error {
 	return nil
 }
 
-func Day9b() error {
-	blockMap, err := inputDay9()
+func Part2() error {
+	blockMap, err := input()
 	if err != nil {
 		return err
 	}

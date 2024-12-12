@@ -1,4 +1,4 @@
-package solutions
+package day7
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var inputPath7 string = "inputs/day7.txt"
+var inputPath string = "inputs/2024/day7.txt"
 
 type Equation struct {
 	Result  int
@@ -120,8 +120,8 @@ func (e *Equation) generateOperatorCombinationsPart2() []Operators {
 	return combinations
 }
 
-func inputDay7() ([]Equation, error) {
-	file, err := os.Open(inputPath7)
+func input() ([]Equation, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -156,8 +156,8 @@ func inputDay7() ([]Equation, error) {
 	return equations, nil
 }
 
-func Day7a() error {
-	equations, err := inputDay7()
+func Part1() error {
+	equations, err := input()
 	if err != nil {
 		return err
 	}
@@ -180,8 +180,8 @@ func Day7a() error {
 	return nil
 }
 
-func Day7b() error {
-	equations, err := inputDay7()
+func Part2() error {
+	equations, err := input()
 	if err != nil {
 		return err
 	}

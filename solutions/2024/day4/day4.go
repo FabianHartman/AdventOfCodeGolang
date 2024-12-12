@@ -1,4 +1,4 @@
-package solutions
+package day4
 
 import (
 	"bufio"
@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-var inputPath4 string = "inputs/day4.txt"
+var inputPath string = "inputs/2024/day4.txt"
 
-func inputDay4() ([][]string, error) {
-	file, err := os.Open(inputPath4)
+func input() ([][]string, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -27,6 +27,43 @@ func inputDay4() ([][]string, error) {
 	}
 
 	return rows, nil
+}
+
+type Coord struct {
+	Col int
+	Row int
+}
+
+func (c *Coord) getLeftDiagonalCoords() []Coord {
+	coords := []Coord{}
+
+	coords = append(coords, Coord{c.Col - 1, c.Row - 1})
+	coords = append(coords, Coord{c.Col + 1, c.Row + 1})
+
+	return coords
+}
+
+func (c *Coord) getRightDiagonalCoords() []Coord {
+	coords := []Coord{}
+
+	coords = append(coords, Coord{c.Col + 1, c.Row - 1})
+	coords = append(coords, Coord{c.Col - 1, c.Row + 1})
+
+	return coords
+}
+
+func findACoords(input [][]string) []Coord {
+	ACoords := []Coord{}
+
+	for row := 1; row < len(input)-1; row++ {
+		for col := 1; col < len(input[row])-1; col++ {
+			if input[row][col] == "A" {
+				ACoords = append(ACoords, Coord{col, row})
+			}
+		}
+	}
+
+	return ACoords
 }
 
 func reversedString(input []string) string {
@@ -99,8 +136,8 @@ func generateStrings(rows [][]string) []string {
 	return result
 }
 
-func Day4a() error {
-	input, err := inputDay4()
+func Part1() error {
+	input, err := input()
 	if err != nil {
 		return err
 	}
@@ -118,50 +155,14 @@ func Day4a() error {
 	return nil
 }
 
-type Coord struct {
-	Col int
-	Row int
-}
-
-func (c *Coord) getLeftDiagonalCoords() []Coord {
-	coords := []Coord{}
-
-	coords = append(coords, Coord{c.Col - 1, c.Row - 1})
-	coords = append(coords, Coord{c.Col + 1, c.Row + 1})
-
-	return coords
-}
-
-func (c *Coord) getRightDiagonalCoords() []Coord {
-	coords := []Coord{}
-
-	coords = append(coords, Coord{c.Col + 1, c.Row - 1})
-	coords = append(coords, Coord{c.Col - 1, c.Row + 1})
-
-	return coords
-}
-
-func findACoords(input [][]string) []Coord {
-	ACoords := []Coord{}
-
-	for row := 1; row < len(input)-1; row++ {
-		for col := 1; col < len(input[row])-1; col++ {
-			if input[row][col] == "A" {
-				ACoords = append(ACoords, Coord{col, row})
-			}
-		}
-	}
-
-	return ACoords
-}
-
-func Day4b() error {
-	input, err := inputDay4()
+func Part2() error {
+	input, err := input()
 	if err != nil {
 		return err
 	}
 
 	total := 0
+
 	ACoords := findACoords(input)
 
 	for _, aCoord := range ACoords {

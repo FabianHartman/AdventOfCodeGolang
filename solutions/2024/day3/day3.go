@@ -1,4 +1,4 @@
-package solutions
+package day3
 
 import (
 	"bufio"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var inputPath3 string = "inputs/day3.txt"
+var inputPath string = "inputs/2024/day3.txt"
 
 type Status struct {
 	MulProgress          string
@@ -42,8 +42,8 @@ func containsString(slice []string, string string) bool {
 	return false
 }
 
-func inputDay3() ([]string, error) {
-	file, err := os.Open(inputPath3)
+func input() ([]string, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -61,8 +61,8 @@ func inputDay3() ([]string, error) {
 	return rows, nil
 }
 
-func Day3a() error {
-	input, err := inputDay3()
+func Part1() error {
+	input, err := input()
 	if err != nil {
 		return err
 	}
@@ -142,8 +142,8 @@ func Day3a() error {
 	return nil
 }
 
-func Day3b() error {
-	input, err := inputDay3()
+func Part2() error {
+	input, err := input()
 	if err != nil {
 		return err
 	}

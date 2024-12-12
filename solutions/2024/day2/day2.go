@@ -1,4 +1,4 @@
-package solutions
+package day2
 
 import (
 	"bufio"
@@ -9,10 +9,10 @@ import (
 	"strings"
 )
 
-var inputPath2 string = "inputs/day2.txt"
+var inputPath string = "inputs/2024/day2.txt"
 
-func inputDay2() ([][]int, error) {
-	file, err := os.Open(inputPath2)
+func input() ([][]int, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -84,8 +84,8 @@ func generateMutations(report []int) [][]int {
 	return mutations
 }
 
-func Day2a() error {
-	reports, err := inputDay2()
+func Part1() error {
+	reports, err := input()
 	if err != nil {
 		return err
 	}
@@ -103,8 +103,8 @@ func Day2a() error {
 	return nil
 }
 
-func Day2b() error {
-	reports, err := inputDay2()
+func Part2() error {
+	reports, err := input()
 	if err != nil {
 		return err
 	}

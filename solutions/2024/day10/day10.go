@@ -1,4 +1,4 @@
-package solutions
+package day10
 
 import (
 	"bufio"
@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-var inputPathDay10 string = "inputs/day10.txt"
+var inputPath string = "inputs/2024/day10.txt"
 
 type Trail struct {
 	Map   [][]int64
@@ -24,8 +24,8 @@ type Traversal struct {
 	VisitedState *VisitedState
 }
 
-func inputDay10() ([]string, error) {
-	file, err := os.Open(inputPathDay10)
+func input() ([]string, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -197,24 +197,24 @@ func (v *VisitedState) countVisitedHeads() int {
 	return count
 }
 
-func Day10a() error {
-	lines, err := inputDay10()
+func Part1() error {
+	lines, err := input()
 	if err != nil {
 		return err
 	}
 
-	result := solvePart1(lines)
-	fmt.Println("day10a:", result)
+	fmt.Println("day10a:", solvePart1(lines))
+
 	return nil
 }
 
-func Day10b() error {
-	lines, err := inputDay10()
+func Part2() error {
+	lines, err := input()
 	if err != nil {
 		return err
 	}
 
-	result := solvePart2(lines)
-	fmt.Println("day10b:", result)
+	fmt.Println("day10b:", solvePart2(lines))
+
 	return nil
 }

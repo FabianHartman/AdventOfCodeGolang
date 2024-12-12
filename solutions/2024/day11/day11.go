@@ -1,4 +1,4 @@
-package solutions
+package day11
 
 import (
 	"bufio"
@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-var inputPathDay11 string = "inputs/day11.txt"
+var inputPath string = "inputs/2024/day11.txt"
 
-func inputDay11() (map[int]int, error) {
-	file, err := os.Open(inputPathDay11)
+func input() (map[int]int, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -35,7 +35,7 @@ func inputDay11() (map[int]int, error) {
 }
 
 func solve(n int) (int, error) {
-	numbers, err := inputDay11()
+	numbers, err := input()
 	if err != nil {
 		return 0, err
 	}
@@ -79,7 +79,7 @@ func solve(n int) (int, error) {
 	return total, nil
 }
 
-func Day11a() error {
+func Part1() error {
 	total, err := solve(25)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func Day11a() error {
 	return nil
 }
 
-func Day11b() error {
+func Part2() error {
 	total, err := solve(75)
 	if err != nil {
 		return err

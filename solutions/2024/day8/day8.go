@@ -1,4 +1,4 @@
-package solutions
+package day8
 
 import (
 	"bufio"
@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-var inputPath8 string = "inputs/day8.txt"
+var inputPath string = "inputs/2024/day8.txt"
 
-type AntennaMap struct {
+type Map struct {
 	NRows, NCols int
 	Antennas     map[string]FrequencyAntennaLocations
 }
@@ -54,7 +54,7 @@ func (al *AntennaLocation) antinodeLocationPart2(to *AntennaLocation, NRows int,
 	return antinodes
 }
 
-func (am *AntennaMap) countUniqueAntinodeLocationsPart1() int {
+func (am *Map) countUniqueAntinodeLocationsPart1() int {
 	uniqueLocations := map[AntennaLocation]bool{}
 
 	for _, frequency := range am.Antennas {
@@ -77,7 +77,7 @@ func (am *AntennaMap) countUniqueAntinodeLocationsPart1() int {
 	return len(uniqueLocations)
 }
 
-func (am *AntennaMap) countUniqueAntinodeLocationsPart2() int {
+func (am *Map) countUniqueAntinodeLocationsPart2() int {
 	uniqueLocations := map[AntennaLocation]bool{}
 
 	for _, frequency := range am.Antennas {
@@ -100,15 +100,15 @@ func (am *AntennaMap) countUniqueAntinodeLocationsPart2() int {
 	return len(uniqueLocations)
 }
 
-func inputDay8() (*AntennaMap, error) {
-	file, err := os.Open(inputPath8)
+func input() (*Map, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
 
 	defer file.Close()
 
-	antennaMap := AntennaMap{Antennas: make(map[string]FrequencyAntennaLocations)}
+	antennaMap := Map{Antennas: make(map[string]FrequencyAntennaLocations)}
 
 	rowI := -1
 
@@ -138,8 +138,8 @@ func inputDay8() (*AntennaMap, error) {
 	return &antennaMap, nil
 }
 
-func Day8a() error {
-	antennaMap, err := inputDay8()
+func Part1() error {
+	antennaMap, err := input()
 	if err != nil {
 		return err
 	}
@@ -149,8 +149,8 @@ func Day8a() error {
 	return nil
 }
 
-func Day8b() error {
-	antennaMap, err := inputDay8()
+func Part2() error {
+	antennaMap, err := input()
 	if err != nil {
 		return err
 	}

@@ -1,16 +1,15 @@
-package solutions
+package day12
 
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 )
 
-var inputFilePath string = "inputs/day12.txt"
+var inputPath string = "inputs/2024/day12.txt"
 
-func readInput() ([][]rune, error) {
-	file, err := os.Open(inputFilePath)
+func input() ([][]rune, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -148,8 +147,8 @@ func calculatePartOne(garden [][]rune) (totalCost int) {
 	return
 }
 
-func Day12a() error {
-	garden, err := readInput()
+func Part1() error {
+	garden, err := input()
 	if err != nil {
 		return err
 	}
@@ -159,10 +158,13 @@ func Day12a() error {
 	return nil
 }
 
-func Day12b() {
-	garden, err := readInput()
+func Part2() error {
+	garden, err := input()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
 	fmt.Println("Day12b: ", calculatePartTwo(garden))
+
+	return nil
 }

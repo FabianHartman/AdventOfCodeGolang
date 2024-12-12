@@ -1,4 +1,4 @@
-package solutions
+package day5
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var inputPath5 string = "inputs/day5.txt"
+var inputPath string = "inputs/2024/day5.txt"
 
 type Rule struct {
 	First  int
@@ -78,8 +78,8 @@ func (u *Update) fixFailingRule(rule *Rule) (Update, error) {
 	return result, nil
 }
 
-func inputDay5() ([]Rule, []Update, error) {
-	file, err := os.Open(inputPath5)
+func input() ([]Rule, []Update, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error opening file: %s", err)
 	}
@@ -131,8 +131,8 @@ func inputDay5() ([]Rule, []Update, error) {
 	return rules, updates, nil
 }
 
-func Day5a() error {
-	rules, updates, err := inputDay5()
+func Part1() error {
+	rules, updates, err := input()
 	if err != nil {
 		return err
 	}
@@ -150,8 +150,8 @@ func Day5a() error {
 	return nil
 }
 
-func Day5b() error {
-	rules, updates, err := inputDay5()
+func Part2() error {
+	rules, updates, err := input()
 	if err != nil {
 		return err
 	}
