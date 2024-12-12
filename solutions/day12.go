@@ -3,99 +3,166 @@ package solutions
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
-	"strings"
 )
 
-var inputPathDay12 string = "inputs/day12.txt"
+var inputFilePath string = "inputs/day12.txt"
 
-func inputDay12() ([][]string, error) {
-	file, err := os.Open(inputPathDay12)
+func readInput() ([][]rune, error) {
+	file, err := os.Open(inputFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %s", err)
 	}
 	defer file.Close()
 
-	gardenMap := [][]string{}
+	var garden [][]rune
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		gardenMap = append(gardenMap, strings.Split(scanner.Text(), ""))
+		row := []rune(scanner.Text())
+		garden = append(garden, row)
 	}
-
-	return gardenMap, nil
+	return garden, nil
 }
 
-var directions = [4][2]int{
-	{-1, 0}, // Up
-	{1, 0},  // Down
-	{0, -1}, // Left
-	{0, 1},  // Right
-}
-
-type PlantCoord struct {
+type Coordinate struct {
 	X, Y int
 }
 
-func calculateRegion(gardenMap [][]string, visited [][]bool, coord *PlantCoord, plantType string) (int, int) {
-	stack := []PlantCoord{*coord}
-	visited[coord.X][coord.Y] = true
-	area := 0
-	perimeter := 0
-
-	for len(stack) > 0 {
-		currentCoord := stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
-		area++
-
-		for _, direction := range directions {
-			adjacentCoord := PlantCoord{X: currentCoord.X + direction[0], Y: currentCoord.Y + direction[1]}
-
-			if adjacentCoord.X < 0 || adjacentCoord.X >= len(gardenMap) || adjacentCoord.Y < 0 || adjacentCoord.Y >= len(gardenMap[0]) || gardenMap[adjacentCoord.X][adjacentCoord.Y] != plantType {
-				perimeter++
-			} else if !visited[adjacentCoord.X][adjacentCoord.Y] {
-				visited[adjacentCoord.X][adjacentCoord.Y] = true
-				stack = append(stack, adjacentCoord)
-			}
-		}
-	}
-
-	return area, perimeter
+var movementDirections = []Coordinate{
+	{-1, 0}, // Up
+	{0, -1}, // Left
+	{1, 0},  // Down
+	{0, 1},  // Right
 }
 
-func solveDay12Part1(input [][]string) (int, error) {
-	visited := make([][]bool, len(input))
-	for i := range visited {
-		visited[i] = make([]bool, len(input[i]))
-	}
+var cornerOffsets = map[Coordinate][]Coordinate{
+	{1, 1}:   {{1, 0}, {0, 1}},
+	{-1, 1}:  {{-1, 0}, {0, 1}},
+	{1, -1}:  {{1, 0}, {0, -1}},
+	{-1, -1}: {{-1, 0}, {0, -1}},
+}
 
-	totalPrice := 0
+func exploreGardenWithPerimeter(currentPosition Coordinate, garden [][]rune, visited map[Coordinate]bool, currentPlant rune, areaSize, perimeterSize *int) {
+	maxRow, maxCol := len(garden), len(garden[0])
+	neighborCount := 0
 
-	for x := 0; x < len(input); x++ {
-		for y := 0; y < len(input[x]); y++ {
-			if !visited[x][y] {
-				plantType := input[x][y]
-				area, perimeter := calculateRegion(input, visited, &PlantCoord{X: x, Y: y}, plantType)
-				price := area * perimeter
-				totalPrice += price
+	visited[currentPosition] = true
+
+	for _, direction := range movementDirections {
+		nextPosition := Coordinate{X: currentPosition.X + direction.X, Y: currentPosition.Y + direction.Y}
+		if isInsideMap(nextPosition, maxRow, maxCol) && garden[nextPosition.X][nextPosition.Y] == currentPlant {
+			neighborCount++
+
+			if !visited[nextPosition] {
+				*areaSize++
+
+				exploreGardenWithPerimeter(nextPosition, garden, visited, currentPlant, areaSize, perimeterSize)
 			}
 		}
 	}
 
-	return totalPrice, nil
+	*perimeterSize += 4 - neighborCount
+}
+
+func calculatePartTwo(garden [][]rune) (totalCost int) {
+	visited := make(map[Coordinate]bool)
+
+	for row := range garden {
+		for col := range garden[row] {
+			if !visited[Coordinate{X: row, Y: col}] {
+				var areaSize, cornerCount int
+
+				exploreGardenWithCorners(Coordinate{X: row, Y: col}, garden, visited, garden[row][col], &areaSize, &cornerCount)
+
+				totalCost += (areaSize + 1) * cornerCount
+			}
+		}
+	}
+	return
+}
+
+func exploreGardenWithCorners(currentPosition Coordinate, garden [][]rune, visited map[Coordinate]bool, currentPlant rune, areaSize, cornerCount *int) {
+	maxRow, maxCol := len(garden), len(garden[0])
+	visited[currentPosition] = true
+
+	for _, direction := range movementDirections {
+		nextPosition := Coordinate{X: currentPosition.X + direction.X, Y: currentPosition.Y + direction.Y}
+		if isInsideMap(nextPosition, maxRow, maxCol) && garden[nextPosition.X][nextPosition.Y] == currentPlant {
+			if !visited[nextPosition] {
+				*areaSize++
+
+				exploreGardenWithCorners(nextPosition, garden, visited, currentPlant, areaSize, cornerCount)
+			}
+		}
+	}
+
+	for corner, pair := range cornerOffsets {
+		cornerPosition := Coordinate{X: currentPosition.X + corner.X, Y: currentPosition.Y + corner.Y}
+		adjacent1 := Coordinate{X: currentPosition.X + pair[0].X, Y: currentPosition.Y + pair[0].Y}
+		adjacent2 := Coordinate{X: currentPosition.X + pair[1].X, Y: currentPosition.Y + pair[1].Y}
+
+		if !isMatching(adjacent1, currentPosition, garden) && !isMatching(adjacent2, currentPosition, garden) {
+			*cornerCount++
+		}
+
+		if isMatching(adjacent1, currentPosition, garden) && isMatching(adjacent2, currentPosition, garden) && !isMatching(currentPosition, cornerPosition, garden) {
+			*cornerCount++
+		}
+	}
+}
+
+func isMatching(position1, position2 Coordinate, garden [][]rune) bool {
+	maxRow, maxCol := len(garden), len(garden[0])
+
+	position1Valid, position2Valid := isInsideMap(position1, maxRow, maxCol), isInsideMap(position2, maxRow, maxCol)
+
+	if !position1Valid && !position2Valid {
+		return true
+	} else if position1Valid && position2Valid {
+		plants := []rune{garden[position1.X][position1.Y], garden[position2.X][position2.Y]}
+		return plants[0] == plants[1]
+	} else {
+		return false
+	}
+}
+
+func isInsideMap(c Coordinate, maxRow, maxCol int) bool {
+	return c.X >= 0 && c.Y >= 0 && c.X < maxRow && c.Y < maxCol
+}
+
+func calculatePartOne(garden [][]rune) (totalCost int) {
+	visited := map[Coordinate]bool{}
+
+	for row := range garden {
+		for col := range garden[row] {
+			if !visited[Coordinate{X: row, Y: col}] {
+				var areaSize, perimeterSize int
+
+				exploreGardenWithPerimeter(Coordinate{X: row, Y: col}, garden, visited, garden[row][col], &areaSize, &perimeterSize)
+
+				totalCost += (areaSize + 1) * perimeterSize
+			}
+		}
+	}
+	return
 }
 
 func Day12a() error {
-	input, err := inputDay12()
+	garden, err := readInput()
 	if err != nil {
 		return err
 	}
 
-	total, err := solveDay12Part1(input)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Day12a:", total)
+	fmt.Println("Day12a:", calculatePartOne(garden))
 
 	return nil
+}
+
+func Day12b() {
+	garden, err := readInput()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Day12b: ", calculatePartTwo(garden))
 }
