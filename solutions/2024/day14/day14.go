@@ -57,8 +57,6 @@ func (this *Robot) getPositionAfterNSeconds(seconds int, width int, tall int) *P
 	position.X = (position.X + 1000*width) % width
 	position.Y = (position.Y + 1000*tall) % tall
 
-	fmt.Println(position)
-
 	return &position
 }
 
@@ -83,6 +81,67 @@ func (this *Position) getQuadrant(width int, tall int) int {
 	}
 
 	return 0
+}
+
+func MoveRobot(robot *Robot, maxX, maxY int) {
+	robot.Position.X = (robot.Position.X + robot.Velocity.X) % maxX
+	robot.Position.Y = (robot.Position.Y + robot.Velocity.Y) % maxY
+
+	if robot.Position.X < 0 {
+		robot.Position.X += maxX
+	}
+	if robot.Position.Y < 0 {
+		robot.Position.Y += maxY
+	}
+}
+
+func CalculateChristmasTreeSeconds(robots []Robot, maxX, maxY int) (int, error) {
+	for counter := 0; counter >= 0; counter++ {
+		for i := range robots {
+			MoveRobot(&robots[i], maxX, maxY)
+		}
+
+		if isChristmasTree(robots, maxX, maxY) {
+			return counter + 1, nil
+		}
+	}
+
+	return 0, fmt.Errorf("no solution found")
+}
+
+// (I don't get it why we check that there are > 10 gridcells with robots in a row
+// I used someone else's code as example for part 2
+func isChristmasTree(robots []Robot, maxX, maxY int) bool {
+	var grid [][]int
+	grid = make([][]int, maxY)
+
+	for y := 0; y < maxY; y++ {
+		grid[y] = make([]int, maxX)
+	}
+
+	for _, robot := range robots {
+		grid[robot.Position.Y][robot.Position.X]++
+	}
+
+	for y := 0; y < maxY; y++ {
+		count := 0
+
+		for x := 0; x < maxX; x++ {
+			if grid[y][x] == 1 {
+				count++
+			}
+
+			if count > 10 {
+				return true
+			}
+
+			if grid[y][x] == 0 {
+				count = 0
+			}
+		}
+	}
+
+	return false
 }
 
 func Part1() error {
@@ -112,5 +171,17 @@ func Part1() error {
 }
 
 func Part2() error {
+	robots, err := input()
+	if err != nil {
+		return err
+	}
+
+	seconds, err := CalculateChristmasTreeSeconds(robots, 101, 103)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Day14b:", seconds)
+
 	return nil
 }
