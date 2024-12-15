@@ -10,168 +10,63 @@ import (
 var inputPath string = "inputs/2024/day15.txt"
 
 type Position struct {
-	X, Y int
+	Y int
+	X int
+}
+
+type WideBox struct {
+	LeftPart  *Position
+	RightPart *Position
+}
+
+type BigWarehouse struct {
+	Boxes         map[WideBox]bool
+	BoxParts      map[Position]WideBox
+	Walls         map[Position]bool
+	Robot         *Position
+	Width, Height int
 }
 
 type Warehouse struct {
-	Robot          *Position
-	Boxes, Walls   map[Position]bool
-	MaxRow, MaxCol int
+	moveSeq       string
+	Boxes, Walls  map[Position]bool
+	robot         *Position
+	Width, Height int
 }
 
-func (this *Warehouse) visualize() {
-	output := [][]string{}
+func (this *Warehouse) convertToBigWarehouse() *BigWarehouse {
+	var bigWarehouse BigWarehouse
 
-	for y := 0; y < this.MaxRow; y++ {
-		output = append(output, []string{})
-		for x := 0; x < this.MaxCol; x++ {
-			output[y] = append(output[y], ".")
-		}
-	}
+	bigWarehouse.Height = this.Height
+	bigWarehouse.Width = this.Width * 2
+	bigWarehouse.Robot = &Position{this.robot.Y, this.robot.X * 2}
 
-	for box := range this.Boxes {
-		output[box.Y][box.X] = "O"
-	}
+	bigWarehouse.Walls = make(map[Position]bool)
 
 	for wall := range this.Walls {
-		output[wall.Y][wall.X] = "#"
+		leftWallPart := Position{wall.Y, wall.X * 2}
+		rightWallPart := Position{leftWallPart.Y, leftWallPart.X + 1}
+
+		bigWarehouse.Walls[leftWallPart] = true
+		bigWarehouse.Walls[rightWallPart] = true
 	}
 
-	output[this.Robot.Y][this.Robot.X] = "@"
+	bigWarehouse.Boxes = make(map[WideBox]bool)
+	bigWarehouse.BoxParts = make(map[Position]WideBox)
 
-	for _, line := range output {
-		fmt.Println(strings.Join(line, ""))
-	}
-}
+	for box := range this.Boxes {
+		leftBoxPart := Position{box.Y, box.X * 2}
+		rightBoxPart := Position{box.Y, leftBoxPart.X + 1}
 
-func (this *Warehouse) isEmpty(point *Position) bool {
-	if _, exists := this.Boxes[*point]; exists {
-		return false
-	}
+		wideBox := WideBox{&leftBoxPart, &rightBoxPart}
 
-	_, exists := this.Walls[*point]
+		bigWarehouse.BoxParts[leftBoxPart] = wideBox
+		bigWarehouse.BoxParts[rightBoxPart] = wideBox
 
-	return !exists
-}
-
-func (this *Warehouse) getTouchingWallsAndBoxes(position *Position, instruction string) (*Position, []Position) {
-	boxesInBetween := []Position{}
-
-	switch instruction {
-	case "<":
-		for i := position.X - 1; i >= 0; i-- {
-			itteratedPosition := Position{X: i, Y: position.Y}
-			if _, exists := this.Walls[itteratedPosition]; exists {
-				return &itteratedPosition, boxesInBetween
-			}
-
-			if _, exists := this.Boxes[itteratedPosition]; exists {
-				boxesInBetween = append(boxesInBetween, itteratedPosition)
-				continue
-			}
-
-			return nil, boxesInBetween
-		}
-	case "^":
-		for i := position.Y - 1; i >= 0; i-- {
-			itteratedPosition := Position{X: position.X, Y: i}
-			if _, exists := this.Walls[itteratedPosition]; exists {
-				return &itteratedPosition, boxesInBetween
-			}
-
-			if _, exists := this.Boxes[itteratedPosition]; exists {
-				boxesInBetween = append(boxesInBetween, itteratedPosition)
-				continue
-			}
-
-			return nil, boxesInBetween
-		}
-	case ">":
-		for i := position.X + 1; i < this.MaxCol; i++ {
-			itteratedPosition := Position{X: i, Y: position.Y}
-
-			if _, exists := this.Walls[itteratedPosition]; exists {
-				return &itteratedPosition, boxesInBetween
-			}
-
-			if _, exists := this.Boxes[itteratedPosition]; exists {
-				boxesInBetween = append(boxesInBetween, itteratedPosition)
-				continue
-			}
-
-			return nil, boxesInBetween
-		}
-	case "v":
-		for i := position.Y + 1; i < this.MaxRow; i++ {
-			itteratedPosition := Position{X: position.X, Y: i}
-			if _, exists := this.Walls[itteratedPosition]; exists {
-				return &itteratedPosition, boxesInBetween
-			}
-
-			if _, exists := this.Boxes[itteratedPosition]; exists {
-				boxesInBetween = append(boxesInBetween, itteratedPosition)
-				continue
-			}
-
-			return nil, boxesInBetween
-		}
+		bigWarehouse.Boxes[wideBox] = true
 	}
 
-	return nil, nil
-}
-
-func (this *Warehouse) executeInstruction(instruction string) {
-	var newRobotPos Position
-
-	switch instruction {
-	case "<":
-		newRobotPos = Position{X: this.Robot.X - 1, Y: this.Robot.Y}
-	case "^":
-		newRobotPos = Position{X: this.Robot.X, Y: this.Robot.Y - 1}
-	case ">":
-		newRobotPos = Position{X: this.Robot.X + 1, Y: this.Robot.Y}
-	case "v":
-		newRobotPos = Position{X: this.Robot.X, Y: this.Robot.Y + 1}
-	}
-
-	if this.isEmpty(&newRobotPos) {
-		this.Robot = &newRobotPos
-	} else {
-		touchingWall, touchingBoxes := this.getTouchingWallsAndBoxes(this.Robot, instruction)
-
-		if touchingWall != nil {
-			return
-		}
-
-		for i := len(touchingBoxes) - 1; i >= 0; i-- {
-			box := touchingBoxes[i]
-			delete(this.Boxes, box)
-
-			switch instruction {
-			case "<":
-				this.Boxes[Position{X: box.X - 1, Y: box.Y}] = true
-			case "^":
-				this.Boxes[Position{X: box.X, Y: box.Y - 1}] = true
-			case ">":
-				this.Boxes[Position{X: box.X + 1, Y: box.Y}] = true
-			case "v":
-				this.Boxes[Position{X: box.X, Y: box.Y + 1}] = true
-			}
-		}
-
-		this.Robot = &newRobotPos
-	}
-}
-
-func (this *Warehouse) calculateBoxCoordinateValues() int {
-	total := 0
-
-	for box, _ := range this.Boxes {
-		total += box.X
-		total += box.Y * 100
-	}
-
-	return total
+	return &bigWarehouse
 }
 
 func input() (*Warehouse, string, error) {
@@ -184,46 +79,277 @@ func input() (*Warehouse, string, error) {
 
 	scanner := bufio.NewScanner(file)
 
-	warehouseFinished := false
-	warehouseRow := -1
-	warehouse := Warehouse{Robot: nil, Boxes: map[Position]bool{}, Walls: map[Position]bool{}, MaxRow: -1, MaxCol: -1}
-	instructions := ""
+	var warehouse Warehouse
+
+	warehouse.Boxes = make(map[Position]bool)
+	warehouse.Walls = make(map[Position]bool)
+
+	scanner.Scan()
+	topWalls := scanner.Text()
+
+	for i := range len(topWalls) {
+		warehouse.Walls[Position{0, i}] = true
+	}
+
+	rowIndex := 1
 
 	for scanner.Scan() {
-		warehouse.MaxRow++
-
 		line := scanner.Text()
 
-		if strings.TrimSpace(line) == "" {
-			warehouseFinished = true
-			continue
-		}
-
-		if !warehouseFinished {
-			warehouseRow++
-
-			gridcells := strings.Split(line, "")
-
-			if warehouse.MaxCol == -1 {
-				warehouse.MaxCol = len(gridcells)
+		if line == topWalls {
+			for columnIndex := range len(topWalls) {
+				warehouse.Walls[Position{rowIndex, columnIndex}] = true
 			}
 
-			for warehouseColumn, value := range gridcells {
-				switch value {
-				case "#":
-					warehouse.Walls[Position{X: warehouseColumn, Y: warehouseRow}] = true
-				case "O":
-					warehouse.Boxes[Position{X: warehouseColumn, Y: warehouseRow}] = true
-				case "@":
-					warehouse.Robot = &Position{X: warehouseColumn, Y: warehouseRow}
-				}
-			}
-		} else {
-			instructions += strings.TrimSpace(line)
+			break
 		}
+
+		for col, char := range strings.Split(line, "") {
+			switch char {
+			case "#":
+				warehouse.Walls[Position{rowIndex, col}] = true
+				break
+			case "O":
+				warehouse.Boxes[Position{rowIndex, col}] = true
+				break
+			case "@":
+				warehouse.robot = &Position{rowIndex, col}
+				break
+			}
+		}
+
+		rowIndex++
+	}
+
+	warehouse.Height = rowIndex + 1
+	warehouse.Width = len(topWalls)
+
+	instructions := ""
+
+	scanner.Scan()
+
+	for scanner.Scan() {
+		instructions += scanner.Text()
 	}
 
 	return &warehouse, instructions, nil
+}
+
+func canBoxMove(house *Warehouse, box *Position, dir string) bool {
+	nextCoords := box.getNextPosition(dir)
+	if _, exists := house.Walls[*nextCoords]; exists {
+		return false
+	}
+
+	if _, exists := house.Boxes[*nextCoords]; exists {
+		return canBoxMove(house, nextCoords, dir)
+	}
+
+	return true
+}
+
+func (this *Warehouse) moveBoxes(box *Position, dir string) {
+	nextCoords := box.getNextPosition(dir)
+
+	if _, exists := this.Walls[*nextCoords]; exists {
+		return
+	}
+
+	if _, exists := this.Boxes[*nextCoords]; exists {
+		this.moveBoxes(nextCoords, dir)
+	}
+
+	delete(this.Boxes, *box)
+	this.Boxes[*nextCoords] = true
+}
+
+func (this *Warehouse) move(dir string) {
+	nextCoords := this.robot.getNextPosition(dir)
+
+	if _, exists := this.Walls[*nextCoords]; exists {
+		return
+	}
+
+	if _, exists := this.Boxes[*nextCoords]; exists {
+		if canBoxMove(this, nextCoords, dir) {
+			this.moveBoxes(nextCoords, dir)
+		} else {
+			return
+		}
+	}
+
+	this.robot = nextCoords
+}
+
+func (this *Warehouse) solve(instructions string) int {
+	for _, instruction := range strings.Split(instructions, "") {
+		this.move(instruction)
+	}
+
+	total := 0
+
+	for box := range this.Boxes {
+		total += 100*box.Y + box.X
+	}
+
+	return total
+}
+
+func (this *Position) getNextPosition(dir string) *Position {
+	nextPosition := Position{this.Y, this.X}
+
+	switch dir {
+	case "^":
+		nextPosition.Y--
+	case ">":
+		nextPosition.X++
+	case "v":
+		nextPosition.Y++
+	default:
+		nextPosition.X--
+	}
+
+	return &nextPosition
+}
+
+func (this *BigWarehouse) canWideBoxMove(side *Position, dir string) bool {
+	canMove := true
+	wideBox := this.BoxParts[*side]
+
+	leftNext := wideBox.LeftPart.getNextPosition(dir)
+	rightNext := wideBox.RightPart.getNextPosition(dir)
+
+	_, leftExists := this.Walls[*leftNext]
+	_, rightExists := this.Walls[*rightNext]
+
+	if leftExists || rightExists {
+		return false
+	}
+
+	if dir == "<" {
+		if _, leftExists := this.BoxParts[*leftNext]; leftExists {
+			canMove = this.canWideBoxMove(leftNext, dir)
+		}
+
+		return canMove
+	}
+
+	if dir == ">" {
+		if _, rightExists := this.BoxParts[*rightNext]; rightExists {
+			canMove = this.canWideBoxMove(rightNext, dir)
+		}
+
+		return canMove
+	}
+
+	wideBoxLeft, LeftOK := this.BoxParts[*leftNext]
+	wideBoxRight, RightOK := this.BoxParts[*rightNext]
+
+	if LeftOK {
+		canMove = canMove && this.canWideBoxMove(leftNext, dir)
+	}
+	if RightOK && wideBoxLeft != wideBoxRight {
+		canMove = canMove && this.canWideBoxMove(rightNext, dir)
+	}
+
+	return canMove
+}
+
+func (this *BigWarehouse) wideBox(side *Position, dir string) {
+	wideBox := this.BoxParts[*side]
+	left, right := wideBox.LeftPart, wideBox.RightPart
+	leftNext, rightNext := left.getNextPosition(dir), right.getNextPosition(dir)
+
+	if dir == "<" {
+		if _, leftExists := this.BoxParts[*leftNext]; leftExists {
+			this.wideBox(leftNext, dir)
+		}
+
+		delete(this.Boxes, wideBox)
+		delete(this.BoxParts, *left)
+		delete(this.BoxParts, *right)
+
+		wideBox.RightPart = wideBox.LeftPart
+		wideBox.LeftPart = leftNext
+
+		this.Boxes[wideBox] = true
+		this.BoxParts[*left] = wideBox
+		this.BoxParts[*leftNext] = wideBox
+
+		return
+	}
+
+	if dir == ">" {
+		if _, rightExists := this.BoxParts[*rightNext]; rightExists {
+			this.wideBox(rightNext, dir)
+		}
+
+		delete(this.Boxes, wideBox)
+		delete(this.BoxParts, *left)
+		delete(this.BoxParts, *right)
+
+		wideBox.LeftPart = wideBox.RightPart
+		wideBox.RightPart = rightNext
+
+		this.Boxes[wideBox] = true
+		this.BoxParts[*right] = wideBox
+		this.BoxParts[*rightNext] = wideBox
+
+		return
+	}
+
+	leftPart, leftExists := this.BoxParts[*leftNext]
+	rightPart, rightExists := this.BoxParts[*rightNext]
+
+	if leftExists {
+		this.wideBox(leftNext, dir)
+	}
+	if rightExists && leftPart != rightPart {
+		this.wideBox(rightNext, dir)
+	}
+
+	delete(this.Boxes, wideBox)
+	delete(this.BoxParts, *left)
+	delete(this.BoxParts, *right)
+
+	wideBox.LeftPart = leftNext
+	wideBox.RightPart = rightNext
+
+	this.Boxes[wideBox] = true
+	this.BoxParts[*leftNext] = wideBox
+	this.BoxParts[*rightNext] = wideBox
+}
+
+func (this *BigWarehouse) bigMove(dir string) {
+	nextCoords := this.Robot.getNextPosition(dir)
+
+	if _, exists := this.Walls[*nextCoords]; exists {
+		return
+	}
+
+	if _, exists := this.BoxParts[*nextCoords]; exists {
+		if this.canWideBoxMove(nextCoords, dir) {
+			this.wideBox(nextCoords, dir)
+		} else {
+			return
+		}
+	}
+
+	this.Robot = nextCoords
+}
+
+func (this *BigWarehouse) solve(instructions string) int {
+	for _, instruction := range strings.Split(instructions, "") {
+		this.bigMove(instruction)
+	}
+
+	total := 0
+
+	for wideBox := range this.Boxes {
+		total += 100*wideBox.LeftPart.Y + wideBox.LeftPart.X
+	}
+
+	return total
 }
 
 func Part1() error {
@@ -232,12 +358,20 @@ func Part1() error {
 		return err
 	}
 
-	for _, instruction := range strings.Split(instructions, "") {
-		warehouse.executeInstruction(instruction)
-		//warehouse.visualize()
+	fmt.Println("Day 15a:", warehouse.solve(instructions))
+
+	return nil
+}
+
+func Part2() error {
+	warehouse, instructions, err := input()
+	if err != nil {
+		return err
 	}
 
-	fmt.Println("Day 15a:", warehouse.calculateBoxCoordinateValues())
+	bigWarehouse := warehouse.convertToBigWarehouse()
+
+	fmt.Println("Day 15b:", bigWarehouse.solve(instructions))
 
 	return nil
 }
