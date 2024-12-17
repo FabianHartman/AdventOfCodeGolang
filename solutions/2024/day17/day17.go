@@ -3,6 +3,7 @@ package day17
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -10,238 +11,212 @@ import (
 
 var inputPath string = "inputs/2024/day17.txt"
 
-func input() (*Computer, error) {
+type Registers struct {
+	A, B, C int
+}
+
+type Instruction struct {
+	Opcode, Operand int
+}
+
+func input() (*Registers, []Instruction, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
-		return nil, fmt.Errorf("error opening %s: %v", inputPath, err)
+		return nil, nil, err
 	}
+
+	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	registers := map[string]int{}
 
 	scanner.Scan()
-	registers["A"], err = strconv.Atoi(scanner.Text()[12:])
+
+	registers := Registers{}
+	_, err = fmt.Sscanf(scanner.Text(), "Register A: %d", &registers.A)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing register A: %v", err)
+		return nil, nil, err
 	}
 
 	scanner.Scan()
-	registers["B"], err = strconv.Atoi(scanner.Text()[12:])
+	_, err = fmt.Sscanf(scanner.Text(), "Register B: %d", &registers.B)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing register B: %v", err)
+		return nil, nil, err
 	}
 
 	scanner.Scan()
-	registers["C"], err = strconv.Atoi(scanner.Text()[12:])
+	_, err = fmt.Sscanf(scanner.Text(), "Register C: %d", &registers.C)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing register C: %v", err)
+		return nil, nil, err
 	}
 
 	scanner.Scan()
 	scanner.Scan()
 
-	stringProgram := strings.Split(scanner.Text()[9:], ",")
+	var instructions []Instruction
+	strInstructions := strings.Split(scanner.Text()[9:], ",")
+	for idx := 0; idx < len(strInstructions); idx += 2 {
+		opcode, _ := strconv.Atoi(strInstructions[idx])
+		operand, _ := strconv.Atoi(strInstructions[idx+1])
 
-	program := make([]int, len(stringProgram))
-	for i, v := range stringProgram {
-		program[i], err = strconv.Atoi(v)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing program instruction: %v", err)
-		}
+		instructions = append(instructions, Instruction{
+			Opcode:  opcode,
+			Operand: operand,
+		})
 	}
 
-	return &Computer{
-		Registers: registers,
-		Program:   program,
-	}, nil
+	return &registers, instructions, nil
 }
 
-type Computer struct {
-	Registers map[string]int
-	Program   []int
-	currentI  int
-	Output    []int
-}
+func run(instruction Instruction, registers *Registers, instructionsPointer *int) string {
+	var combo int
 
-func (this *Computer) copyInitial() *Computer {
-	registers := map[string]int{}
-	for k, v := range this.Registers {
-		registers[k] = v
-	}
-
-	program := make([]int, len(this.Program))
-	copy(program, this.Program)
-
-	return &Computer{
-		Registers: registers,
-		Program:   program,
-	}
-}
-
-func (this *Computer) adv(operand int) {
-	numerator := this.Registers["A"]
-	denominator := 1 << this.getComboValue(operand)
-
-	this.Registers["A"] = numerator / denominator
-	this.currentI += 2
-}
-
-func (this *Computer) bdv(operand int) {
-	numerator := this.Registers["A"]
-	denominator := 1 << this.getComboValue(operand)
-
-	this.Registers["B"] = numerator / denominator
-	this.currentI += 2
-}
-
-func (this *Computer) cdv(operand int) {
-	numerator := this.Registers["A"]
-	denominator := 1 << this.getComboValue(operand)
-
-	this.Registers["C"] = numerator / denominator
-	this.currentI += 2
-}
-
-func (this *Computer) bxl(operand int) {
-	this.Registers["B"] ^= operand
-	this.currentI += 2
-}
-
-func (this *Computer) bst(operand int) {
-	this.Registers["B"] = this.getComboValue(operand) % 8
-	this.currentI += 2
-}
-
-func (this *Computer) jnz(operand int) {
-	if this.Registers["A"] == 0 {
-		this.currentI += 2
-		return
-	}
-	this.currentI = operand
-}
-
-func (this *Computer) bxc() {
-	this.Registers["B"] ^= this.Registers["C"]
-	this.currentI += 2
-}
-
-func (this *Computer) out(operand int) {
-	this.Output = append(this.Output, this.getComboValue(operand)%8)
-	this.currentI += 2
-}
-
-func (this *Computer) getComboValue(operand int) int {
-	switch operand {
+	switch instruction.Operand {
 	case 4:
-		return this.Registers["A"]
+		combo = registers.A
 	case 5:
-		return this.Registers["B"]
+		combo = registers.B
 	case 6:
-		return this.Registers["C"]
+		combo = registers.C
 	default:
-		return operand
+		combo = instruction.Operand
 	}
-}
 
-func (this *Computer) runCorrectInstruction(opcode int, operand int) error {
-	switch opcode {
+	var output string
+	switch instruction.Opcode {
 	case 0:
-		this.adv(operand)
+		registers.A = registers.A / int(math.Pow(2, float64(combo)))
+		*instructionsPointer++
 	case 1:
-		this.bxl(operand)
+		registers.B = registers.B ^ instruction.Operand
+		*instructionsPointer++
 	case 2:
-		this.bst(operand)
+		registers.B = combo % 8
+		*instructionsPointer++
 	case 3:
-		this.jnz(operand)
+		if registers.A != 0 {
+			*instructionsPointer = instruction.Operand / 2
+		} else {
+			*instructionsPointer++
+		}
 	case 4:
-		this.bxc()
+		registers.B = registers.B ^ registers.C
+		*instructionsPointer++
 	case 5:
-		this.out(operand)
+		output = strconv.Itoa(combo % 8)
+		*instructionsPointer++
 	case 6:
-		this.bdv(operand)
+		registers.B = registers.A / int(math.Pow(2, float64(combo)))
+		*instructionsPointer++
 	case 7:
-		this.cdv(operand)
-	default:
-		return fmt.Errorf("unknown opcode: %d", opcode)
+		registers.C = registers.A / int(math.Pow(2, float64(combo)))
+		*instructionsPointer++
 	}
 
-	return nil
+	return output
 }
 
-func (this *Computer) getJoinedOutput() string {
-	output := []string{}
+func runAndGetOutput(registers *Registers, instructions []Instruction) (string, error) {
+	pc := 0
+	outs := []string{}
 
-	for _, value := range this.Output {
-		output = append(output, strconv.Itoa(value))
-	}
-
-	return strings.Join(output, ",")
-}
-
-func (this *Computer) runProgram() (string, error) {
-	for this.currentI < len(this.Program)-1 {
-		opcode, operand := this.Program[this.currentI], this.Program[this.currentI+1]
-
-		err := this.runCorrectInstruction(opcode, operand)
-		if err != nil {
-			return "", err
+	for pc < len(instructions) {
+		out := run(instructions[pc], registers, &pc)
+		if out != "" {
+			outs = append(outs, out)
 		}
 	}
 
-	return this.getJoinedOutput(), nil
+	return strings.Join(outs, ","), nil
 }
 
-func (c *Computer) findQuine() (int, error) {
-	for i := 0; ; i++ {
-		computer := c.copyInitial()
-		computer.Registers["A"] = i
-		output, err := computer.runProgram()
-		if err != nil {
-			return 0, err
+func backPropagation(instructions []Instruction, position, initVal int) (int, error) {
+	intIns := make([]int, len(instructions)*2)
+	for idx, instruction := range instructions {
+		intIns[idx*2] = instruction.Opcode
+		intIns[idx*2+1] = instruction.Operand
+	}
+
+	for idx := 0; idx < 8; idx++ {
+		registers := Registers{
+			A: initVal*8 + idx,
+			B: 0,
+			C: 0,
 		}
 
-		if isMatchingOutput(output, computer.Program) {
-			return i, nil
+		pc := 0
+		var output []int
+
+		for pc < len(instructions) {
+			out := run(instructions[pc], &registers, &pc)
+			if out != "" {
+				n, err := strconv.Atoi(out)
+				if err != nil {
+					return 0, err
+				}
+
+				output = append(output, n)
+			}
+		}
+
+		ok := true
+
+		for j := position; j < len(intIns); j++ {
+			if intIns[j] != output[j-position] {
+				ok = false
+				break
+			}
+		}
+
+		if ok {
+			if position == 0 {
+				return initVal*8 + idx, nil
+			}
+
+			val, err := backPropagation(instructions, position-1, initVal*8+idx)
+			if err != nil {
+				return 0, err
+			}
+
+			if val != -1 {
+				return val, nil
+			}
 		}
 	}
+	return -1, nil
 }
 
-func isMatchingOutput(output string, expectedProgram []int) bool {
-	expectedOutput := []string{}
-	for _, v := range expectedProgram {
-		expectedOutput = append(expectedOutput, strconv.Itoa(v))
-	}
-
-	return output == strings.Join(expectedOutput, ",")
+func findLowestAValue(instructions []Instruction) (int, error) {
+	return backPropagation(instructions, len(instructions)*2-1, 0)
 }
 
 func Part1() error {
-	computer, err := input()
+	registers, instructions, err := input()
 	if err != nil {
 		return err
 	}
 
-	output, err := computer.runProgram()
+	output, err := runAndGetOutput(registers, instructions)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Day17a:", output)
+	fmt.Println("Day 17a:", output)
 
 	return nil
 }
 
 func Part2() error {
-	computer, err := input()
+	_, instructions, err := input()
 	if err != nil {
 		return err
 	}
 
-	initialValue, err := computer.findQuine()
+	output, err := findLowestAValue(instructions)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Day17b:", initialValue)
+	fmt.Println("Day 17b:", output)
+
 	return nil
 }
