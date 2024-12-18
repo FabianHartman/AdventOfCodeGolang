@@ -54,9 +54,10 @@ func input() (*Registers, []Instruction, error) {
 
 	var instructions []Instruction
 	strInstructions := strings.Split(scanner.Text()[9:], ",")
-	for idx := 0; idx < len(strInstructions); idx += 2 {
-		opcode, _ := strconv.Atoi(strInstructions[idx])
-		operand, _ := strconv.Atoi(strInstructions[idx+1])
+
+	for instructionI := 0; instructionI < len(strInstructions); instructionI += 2 {
+		opcode, _ := strconv.Atoi(strInstructions[instructionI])
+		operand, _ := strconv.Atoi(strInstructions[instructionI+1])
 
 		instructions = append(instructions, Instruction{
 			Opcode:  opcode,
@@ -98,6 +99,7 @@ func run(instruction Instruction, registers *Registers, instructionsPointer *int
 		} else {
 			*instructionsPointer++
 		}
+
 	case 4:
 		registers.B = registers.B ^ registers.C
 		*instructionsPointer++
@@ -131,6 +133,7 @@ func runAndGetOutput(registers *Registers, instructions []Instruction) (string, 
 
 func backPropagation(instructions []Instruction, position, initVal int) (int, error) {
 	intIns := make([]int, len(instructions)*2)
+
 	for idx, instruction := range instructions {
 		intIns[idx*2] = instruction.Opcode
 		intIns[idx*2+1] = instruction.Operand
@@ -148,6 +151,7 @@ func backPropagation(instructions []Instruction, position, initVal int) (int, er
 
 		for pc < len(instructions) {
 			out := run(instructions[pc], &registers, &pc)
+
 			if out != "" {
 				n, err := strconv.Atoi(out)
 				if err != nil {
@@ -163,6 +167,7 @@ func backPropagation(instructions []Instruction, position, initVal int) (int, er
 		for j := position; j < len(intIns); j++ {
 			if intIns[j] != output[j-position] {
 				ok = false
+
 				break
 			}
 		}
