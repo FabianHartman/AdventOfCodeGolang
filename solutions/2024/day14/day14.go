@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var inputPath string = "inputs/2024/day14.txt"
+var inputPath = "inputs/2024/day14.txt"
 
 type Position struct {
 	X, Y int

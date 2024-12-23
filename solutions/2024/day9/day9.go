@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/2024/day9.txt"
+var inputPath = "inputs/2024/day9.txt"
 
 type Block struct {
 	Length int

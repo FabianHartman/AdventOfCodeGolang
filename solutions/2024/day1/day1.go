@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/2024/day1.txt"
+var inputPath = "inputs/2024/day1.txt"
 
 func Part1() error {
 	file, err := os.Open(inputPath)

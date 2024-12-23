@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/2024/day3.txt"
+var inputPath = "inputs/2024/day3.txt"
 
 type Status struct {
 	MulProgress          string

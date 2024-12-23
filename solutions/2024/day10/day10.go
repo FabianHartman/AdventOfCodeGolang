@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-var inputPath string = "inputs/2024/day10.txt"
+var inputPath = "inputs/2024/day10.txt"
 
 type Trail struct {
 	Map   [][]int64

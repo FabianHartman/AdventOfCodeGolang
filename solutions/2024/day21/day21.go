@@ -10,7 +10,7 @@ import (
 	"unicode"
 )
 
-var inputPath string = "inputs/2024/day21.txt"
+var inputPath = "inputs/2024/day21.txt"
 
 type Position struct {
 	X, Y int

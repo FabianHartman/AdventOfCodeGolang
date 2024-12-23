@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/2024/day7.txt"
+var inputPath = "inputs/2024/day7.txt"
 
 type Equation struct {
 	Result  int

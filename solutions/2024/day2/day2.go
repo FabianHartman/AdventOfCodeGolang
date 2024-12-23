@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/2024/day2.txt"
+var inputPath = "inputs/2024/day2.txt"
 
 func input() ([][]int, error) {
 	file, err := os.Open(inputPath)

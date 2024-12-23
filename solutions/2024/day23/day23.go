@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/2024/day23.txt"
+var inputPath = "inputs/2024/day23.txt"
 
 func input() (map[string][]string, error) {
 	file, err := os.Open(inputPath)

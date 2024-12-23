@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/2024/day13.txt"
+var inputPath = "inputs/2024/day13.txt"
 
 type Pair struct {
 	One, Two int

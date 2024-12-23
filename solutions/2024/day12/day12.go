@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var inputPath string = "inputs/2024/day12.txt"
+var inputPath = "inputs/2024/day12.txt"
 
 func input() ([][]rune, error) {
 	file, err := os.Open(inputPath)

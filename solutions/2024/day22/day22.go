@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-var inputPath string = "inputs/2024/day22.txt"
+var inputPath = "inputs/2024/day22.txt"
 
 type BananaDeltaPair struct {
 	Delta  int

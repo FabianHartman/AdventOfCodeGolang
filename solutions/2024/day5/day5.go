@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/2024/day5.txt"
+var inputPath = "inputs/2024/day5.txt"
 
 type Rule struct {
 	First  int

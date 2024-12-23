@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var inputPath string = "inputs/2024/day8.txt"
+var inputPath = "inputs/2024/day8.txt"
 
 type Map struct {
 	NRows, NCols int
