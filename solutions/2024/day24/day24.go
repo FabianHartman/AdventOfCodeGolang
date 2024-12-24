@@ -112,7 +112,7 @@ func calculatePortValues(values map[string]int, gates map[string][]string) map[s
 func getZOutput(values map[string]int) string {
 	zGates := []string{}
 
-	for gate, _ := range values {
+	for gate := range values {
 		if gate[0] == 'z' {
 			zGates = append(zGates, gate)
 		}
@@ -138,6 +138,73 @@ func convertBinaryToInt(binary string) (int, error) {
 	return int(num), nil
 }
 
+func findGate(inputWire1, inputWire2, gateOperator string, gates map[string][]string) string {
+	for gate, parts := range gates {
+		if (parts[0] == inputWire1 && parts[1] == inputWire2 && parts[2] == gateOperator) ||
+			(parts[0] == inputWire2 && parts[1] == inputWire1 && parts[2] == gateOperator) {
+			return gate
+		}
+	}
+
+	return ""
+}
+
+func swapWires(gates map[string][]string) (string, error) {
+	var swapped []string
+	var carry string
+
+	for i := 0; i < 45; i++ {
+		n := fmt.Sprintf("%02d", i)
+		var xorCarryXor, nextCarry string
+
+		xor := findGate("x"+n, "y"+n, "XOR", gates)
+		and := findGate("x"+n, "y"+n, "AND", gates)
+
+		if carry != "" {
+			andCarryXor := findGate(carry, xor, "AND", gates)
+			if andCarryXor == "" {
+				xor, and = and, xor
+				swapped = append(swapped, xor, and)
+				andCarryXor = findGate(carry, xor, "AND", gates)
+			}
+
+			xorCarryXor = findGate(carry, xor, "XOR", gates)
+
+			if strings.HasPrefix(xor, "z") {
+				xor, xorCarryXor = xorCarryXor, xor
+				swapped = append(swapped, xor, xorCarryXor)
+			}
+
+			if strings.HasPrefix(and, "z") {
+				and, xorCarryXor = xorCarryXor, and
+				swapped = append(swapped, and, xorCarryXor)
+			}
+
+			if strings.HasPrefix(andCarryXor, "z") {
+				andCarryXor, xorCarryXor = xorCarryXor, andCarryXor
+				swapped = append(swapped, andCarryXor, xorCarryXor)
+			}
+
+			nextCarry = findGate(andCarryXor, and, "OR", gates)
+		}
+
+		if strings.HasPrefix(nextCarry, "z") && nextCarry != "z45" {
+			nextCarry, xorCarryXor = xorCarryXor, nextCarry
+			swapped = append(swapped, nextCarry, xorCarryXor)
+		}
+
+		if carry == "" {
+			carry = and
+		} else {
+			carry = nextCarry
+		}
+	}
+
+	sort.Strings(swapped)
+
+	return strings.Join(swapped, ","), nil
+}
+
 func Part1() error {
 	initialValues, gates, err := input()
 	if err != nil {
@@ -151,5 +218,20 @@ func Part1() error {
 
 	fmt.Println("Day24a:", output)
 
+	return nil
+}
+
+func Part2() error {
+	_, gates, err := input()
+	if err != nil {
+		return err
+	}
+
+	swapped, err := swapWires(gates)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Day24b:", swapped)
 	return nil
 }
