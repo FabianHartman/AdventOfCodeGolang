@@ -101,7 +101,6 @@ func Part1() error {
 
 	for _, equation := range equations {
 		total += calcMachine(&equation)
-		fmt.Println(total)
 	}
 
 	fmt.Println("Day 13a:", total)
