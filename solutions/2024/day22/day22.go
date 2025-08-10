@@ -96,7 +96,7 @@ func Part1() error {
 		total += getNthSecretNumber(num, 2000)
 	}
 
-	fmt.Println("Day22a:", total)
+	fmt.Println("Day 22a:", total)
 
 	return nil
 }
@@ -121,7 +121,7 @@ func Part2() error {
 		}
 	}
 
-	fmt.Println("Day22b:", result)
+	fmt.Println("Day 22b:", result)
 
 	return nil
 }

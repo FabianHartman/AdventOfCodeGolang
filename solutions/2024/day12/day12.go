@@ -153,7 +153,7 @@ func Part1() error {
 		return err
 	}
 
-	fmt.Println("Day12a:", calculatePartOne(garden))
+	fmt.Println("Day 12a:", calculatePartOne(garden))
 
 	return nil
 }
@@ -164,7 +164,7 @@ func Part2() error {
 		return err
 	}
 
-	fmt.Println("Day12b: ", calculatePartTwo(garden))
+	fmt.Println("Day 12b: ", calculatePartTwo(garden))
 
 	return nil
 }

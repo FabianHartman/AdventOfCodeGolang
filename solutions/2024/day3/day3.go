@@ -137,7 +137,7 @@ func Part1() error {
 		status.Reset()
 	}
 
-	fmt.Println("day3a:", total)
+	fmt.Println("Day 3a:", total)
 
 	return nil
 }
@@ -255,7 +255,7 @@ func Part2() error {
 		}
 	}
 
-	fmt.Println("day3b:", total)
+	fmt.Println("Day 3b:", total)
 
 	return nil
 }

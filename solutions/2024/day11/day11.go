@@ -85,7 +85,7 @@ func Part1() error {
 		return err
 	}
 
-	fmt.Println("Day11a:", total)
+	fmt.Println("Day 11a:", total)
 
 	return nil
 }
@@ -96,7 +96,7 @@ func Part2() error {
 		return err
 	}
 
-	fmt.Println("Day11a:", total)
+	fmt.Println("Day 11a:", total)
 
 	return nil
 }

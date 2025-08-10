@@ -187,7 +187,7 @@ func Part1() error {
 
 	goodAvailableCheatOptions := raceTrack.picoSecondsCheats()
 
-	fmt.Println("Day20a:", goodAvailableCheatOptions)
+	fmt.Println("Day 20a:", goodAvailableCheatOptions)
 
 	return nil
 }
@@ -200,7 +200,7 @@ func Part2() error {
 
 	goodAvailableCheatOptions := raceTrack.picoSecondsBigCheats()
 
-	fmt.Println("Day20b:", goodAvailableCheatOptions)
+	fmt.Println("Day 20b:", goodAvailableCheatOptions)
 
 	return nil
 }

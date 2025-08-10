@@ -216,7 +216,7 @@ func Part1() error {
 		return err
 	}
 
-	fmt.Println("Day24a:", output)
+	fmt.Println("Day 24a:", output)
 
 	return nil
 }
@@ -232,6 +232,6 @@ func Part2() error {
 		return err
 	}
 
-	fmt.Println("Day24b:", swapped)
+	fmt.Println("Day 24b:", swapped)
 	return nil
 }

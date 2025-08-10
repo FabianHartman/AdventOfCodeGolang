@@ -89,7 +89,7 @@ func Solution() error {
 		}
 	}
 
-	fmt.Println("Day25:", count)
+	fmt.Println("Day 25:", count)
 
 	return nil
 }

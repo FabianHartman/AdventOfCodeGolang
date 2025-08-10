@@ -257,7 +257,7 @@ func Part1() error {
 		return err
 	}
 
-	fmt.Println("Day21a:", complexity)
+	fmt.Println("Day 21a:", complexity)
 
 	return nil
 }
@@ -275,7 +275,7 @@ func Part2() error {
 		return err
 	}
 
-	fmt.Println("Day21a:", complexity)
+	fmt.Println("Day 21a:", complexity)
 
 	return nil
 }

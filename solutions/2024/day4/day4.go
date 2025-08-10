@@ -150,7 +150,7 @@ func Part1() error {
 		total += len(xmasPattern.FindAllString(option, -1))
 	}
 
-	fmt.Println("day 4a:", total)
+	fmt.Println("Day 4a:", total)
 
 	return nil
 }
@@ -193,7 +193,7 @@ func Part2() error {
 		}
 	}
 
-	fmt.Println("day 4b:", total)
+	fmt.Println("Day 4b:", total)
 
 	return nil
 }

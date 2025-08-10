@@ -175,7 +175,7 @@ func Part1() error {
 		return err
 	}
 
-	fmt.Println("day9a:", sumUpChecksum(generateChecksumPart1(createIdList(blockMap))))
+	fmt.Println("Day 9a:", sumUpChecksum(generateChecksumPart1(createIdList(blockMap))))
 
 	return nil
 }
@@ -186,7 +186,7 @@ func Part2() error {
 		return err
 	}
 
-	fmt.Println("day9b:", sumUpChecksum(generateChecksumPart2(createIdList(blockMap))))
+	fmt.Println("Day 9b:", sumUpChecksum(generateChecksumPart2(createIdList(blockMap))))
 
 	return nil
 }

@@ -203,7 +203,7 @@ func Part1() error {
 		return err
 	}
 
-	fmt.Println("day10a:", solvePart1(lines))
+	fmt.Println("Day 10a:", solvePart1(lines))
 
 	return nil
 }
@@ -214,7 +214,7 @@ func Part2() error {
 		return err
 	}
 
-	fmt.Println("day10b:", solvePart2(lines))
+	fmt.Println("Day 10b:", solvePart2(lines))
 
 	return nil
 }

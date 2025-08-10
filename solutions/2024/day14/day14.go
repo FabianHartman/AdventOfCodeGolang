@@ -181,7 +181,7 @@ func Part2() error {
 		return err
 	}
 
-	fmt.Println("Day14b:", seconds)
+	fmt.Println("Day 14b:", seconds)
 
 	return nil
 }

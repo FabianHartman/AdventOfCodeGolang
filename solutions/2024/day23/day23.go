@@ -57,7 +57,7 @@ func Part1() error {
 		}
 	}
 
-	fmt.Println("Day23a:", len(cycles))
+	fmt.Println("Day 23a:", len(cycles))
 
 	return nil
 }
@@ -80,7 +80,7 @@ func Part2() error {
 
 	slices.Sort(maxLenComputerList)
 
-	fmt.Println("Day23b:", strings.Join(maxLenComputerList, ","))
+	fmt.Println("Day 23b:", strings.Join(maxLenComputerList, ","))
 
 	return nil
 }
