@@ -1,7 +1,9 @@
 package runner
 
+import "adventOfCode/helper/timer"
+
 func Run(function func() error) {
-	err := function()
+	err := timer.TimeExecution(function)
 	if err != nil {
 		panic(err)
 	}
