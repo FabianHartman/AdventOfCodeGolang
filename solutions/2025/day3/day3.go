@@ -3,7 +3,6 @@ package day3
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 )
@@ -78,13 +77,11 @@ func Part2() error {
 		lastBatteryWithoutSkip := len(inputRow) - 12
 
 		for batteryIndex, thisBatteryJoltage := range inputRow {
-			firstValidIndex := max(batteryIndex-lastBatteryWithoutSkip, 0)
+			joltageNumber, _ := strconv.Atoi(string(thisBatteryJoltage))
 
-			n, _ := strconv.Atoi(string(thisBatteryJoltage))
-
-			for j := firstValidIndex; j < 12; j++ {
-				if n > bankJoltages[j] {
-					bankJoltages[j] = n
+			for j := max(batteryIndex-lastBatteryWithoutSkip, 0); j < 12; j++ {
+				if joltageNumber > bankJoltages[j] {
+					bankJoltages[j] = joltageNumber
 
 					for k := j + 1; k < 12; k++ {
 						if bankJoltages[k] == 0 {
@@ -99,10 +96,14 @@ func Part2() error {
 			}
 		}
 
-		bankJoltage := 0
-		for j := range 12 {
-			bankJoltage += bankJoltages[j] * int(math.Pow10(12-1-j))
+		bankJoltageStr := ""
+
+		for i := 0; i < 12; i++ {
+			bankJoltageStr += strconv.Itoa(bankJoltages[i])
 		}
+
+		bankJoltage, _ := strconv.Atoi(bankJoltageStr)
+
 		result += bankJoltage
 	}
 
