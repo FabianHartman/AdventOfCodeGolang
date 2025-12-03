@@ -54,7 +54,7 @@ func Part1() error {
 }
 
 func Part2() error {
-	var result int
+	var totalSum int
 
 	file, err := os.Open(inputPath)
 	if err != nil {
@@ -71,24 +71,24 @@ func Part2() error {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		inputRow := scanner.Text()
+		line := scanner.Text()
 
-		bankJoltages := make([]int, 12)
-		lastBatteryWithoutSkip := len(inputRow) - 12
+		highestDigits := make([]int, 12)
+		skipOffset := len(line) - 12
 
-		for batteryIndex, thisBatteryJoltage := range inputRow {
-			joltageNumber, _ := strconv.Atoi(string(thisBatteryJoltage))
+		for charIndex, char := range line {
+			digit, _ := strconv.Atoi(string(char))
 
-			for j := max(batteryIndex-lastBatteryWithoutSkip, 0); j < 12; j++ {
-				if joltageNumber > bankJoltages[j] {
-					bankJoltages[j] = joltageNumber
+			for slotIndex := max(charIndex-skipOffset, 0); slotIndex < 12; slotIndex++ {
+				if digit > highestDigits[slotIndex] {
+					highestDigits[slotIndex] = digit
 
-					for k := j + 1; k < 12; k++ {
-						if bankJoltages[k] == 0 {
+					for nextSlot := slotIndex + 1; nextSlot < 12; nextSlot++ {
+						if highestDigits[nextSlot] == 0 {
 							break
 						}
 
-						bankJoltages[k] = 0
+						highestDigits[nextSlot] = 0
 					}
 
 					break
@@ -96,23 +96,19 @@ func Part2() error {
 			}
 		}
 
-		bankJoltageStr := ""
-
+		numberStr := ""
 		for i := 0; i < 12; i++ {
-			bankJoltageStr += strconv.Itoa(bankJoltages[i])
+			numberStr += strconv.Itoa(highestDigits[i])
 		}
 
-		bankJoltage, _ := strconv.Atoi(bankJoltageStr)
-
-		result += bankJoltage
+		number, _ := strconv.Atoi(numberStr)
+		totalSum += number
 	}
 
-	err = scanner.Err()
-	if err != nil {
+	if err := scanner.Err(); err != nil {
 		return fmt.Errorf("error reading the file: %s", err)
 	}
 
-	fmt.Println("Day 3b:", result)
-
+	fmt.Println("Day 3b:", totalSum)
 	return nil
 }
