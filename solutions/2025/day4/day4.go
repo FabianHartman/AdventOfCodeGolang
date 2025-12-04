@@ -13,6 +13,65 @@ type Position struct {
 	Col int
 }
 
+func readInput(paperPositions map[Position]bool) error {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return fmt.Errorf("error opening file: %s", err)
+	}
+
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(file)
+
+	scanner := bufio.NewScanner(file)
+
+	for row := 0; scanner.Scan(); row++ {
+		inputRow := scanner.Text()
+
+		for col, char := range inputRow {
+			if char == '@' {
+				paperPositions[Position{Row: row, Col: col}] = true
+			}
+		}
+	}
+
+	err = scanner.Err()
+	if err != nil {
+		return fmt.Errorf("error reading the file: %s", err)
+	}
+
+	return nil
+}
+
+func getAmountOfAvailablePapers(paperPositions map[Position]bool, removePapers bool) int {
+	thisIterationsResult := 0
+	for paper := range paperPositions {
+		amountOfAdjacentPapers := 0
+		for _, adjacentPosition := range paper.GetAdjacentPositions() {
+			if paperPositions[adjacentPosition] {
+				amountOfAdjacentPapers++
+
+				if amountOfAdjacentPapers >= 4 {
+					break
+				}
+			}
+		}
+
+		if amountOfAdjacentPapers < 4 {
+			thisIterationsResult++
+
+			if removePapers {
+				delete(paperPositions, paper)
+			}
+		}
+	}
+
+	return thisIterationsResult
+}
+
 func (this Position) GetAdjacentPositions() []Position {
 	positions := []Position{}
 
@@ -29,54 +88,14 @@ func (this Position) GetAdjacentPositions() []Position {
 }
 
 func Part1() error {
-	var result int
 	paperPositions := map[Position]bool{}
 
-	file, err := os.Open(inputPath)
+	err := readInput(paperPositions)
 	if err != nil {
-		return fmt.Errorf("error opening file: %s", err)
+		return err
 	}
 
-	defer func(file *os.File) {
-		err = file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
-
-	scanner := bufio.NewScanner(file)
-
-	for row := 0; scanner.Scan(); row++ {
-		inputRow := scanner.Text()
-
-		for col, char := range inputRow {
-			if char == '@' {
-				paperPositions[Position{Row: row, Col: col}] = true
-			}
-		}
-	}
-
-	err = scanner.Err()
-	if err != nil {
-		return fmt.Errorf("error reading the file: %s", err)
-	}
-
-	for paper := range paperPositions {
-		adjacentsAmount := 0
-		for _, adjacentPosition := range paper.GetAdjacentPositions() {
-			if paperPositions[adjacentPosition] {
-				adjacentsAmount++
-
-				if adjacentsAmount >= 4 {
-					break
-				}
-			}
-		}
-
-		if adjacentsAmount < 4 {
-			result++
-		}
-	}
+	result := getAmountOfAvailablePapers(paperPositions, false)
 
 	fmt.Println("Day 4a:", result)
 
@@ -87,61 +106,15 @@ func Part2() error {
 	var result int
 	paperPositions := map[Position]bool{}
 
-	file, err := os.Open(inputPath)
+	err := readInput(paperPositions)
 	if err != nil {
-		return fmt.Errorf("error opening file: %s", err)
+		return err
 	}
 
-	defer func(file *os.File) {
-		err = file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
-
-	scanner := bufio.NewScanner(file)
-
-	for row := 0; scanner.Scan(); row++ {
-		inputRow := scanner.Text()
-
-		for col, char := range inputRow {
-			if char == '@' {
-				paperPositions[Position{Row: row, Col: col}] = true
-			}
-		}
-	}
-
-	err = scanner.Err()
-	if err != nil {
-		return fmt.Errorf("error reading the file: %s", err)
-	}
-
-	for true {
-		thisIterationsResult := 0
-		for paper := range paperPositions {
-			adjacentsAmount := 0
-			for _, adjacentPosition := range paper.GetAdjacentPositions() {
-				if paperPositions[adjacentPosition] {
-					adjacentsAmount++
-
-					if adjacentsAmount >= 4 {
-						break
-					}
-				}
-			}
-
-			if adjacentsAmount < 4 {
-				thisIterationsResult++
-
-				delete(paperPositions, paper)
-			}
-		}
-
-		if thisIterationsResult < 1 {
-			break
-		}
-
+	thisIterationsResult := getAmountOfAvailablePapers(paperPositions, true)
+	for thisIterationsResult >= 1 {
 		result += thisIterationsResult
+		thisIterationsResult = getAmountOfAvailablePapers(paperPositions, true)
 	}
 
 	fmt.Println("Day 4b:", result)
