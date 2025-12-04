@@ -82,3 +82,69 @@ func Part1() error {
 
 	return nil
 }
+
+func Part2() error {
+	var result int
+	paperPositions := map[Position]bool{}
+
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return fmt.Errorf("error opening file: %s", err)
+	}
+
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(file)
+
+	scanner := bufio.NewScanner(file)
+
+	for row := 0; scanner.Scan(); row++ {
+		inputRow := scanner.Text()
+
+		for col, char := range inputRow {
+			if char == '@' {
+				paperPositions[Position{Row: row, Col: col}] = true
+			}
+		}
+	}
+
+	err = scanner.Err()
+	if err != nil {
+		return fmt.Errorf("error reading the file: %s", err)
+	}
+
+	for true {
+		thisIterationsResult := 0
+		for paper := range paperPositions {
+			adjacentsAmount := 0
+			for _, adjacentPosition := range paper.GetAdjacentPositions() {
+				if paperPositions[adjacentPosition] {
+					adjacentsAmount++
+
+					if adjacentsAmount >= 4 {
+						break
+					}
+				}
+			}
+
+			if adjacentsAmount < 4 {
+				thisIterationsResult++
+
+				delete(paperPositions, paper)
+			}
+		}
+
+		if thisIterationsResult < 1 {
+			break
+		}
+
+		result += thisIterationsResult
+	}
+
+	fmt.Println("Day 4b:", result)
+
+	return nil
+}
