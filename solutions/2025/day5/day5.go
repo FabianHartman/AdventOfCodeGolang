@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -97,6 +98,22 @@ func Part1() error {
 	return nil
 }
 
+func minIngredientID(a, b IngredientID) IngredientID {
+	if a < b {
+		return a
+	}
+
+	return b
+}
+
+func maxIngredientID(a, b IngredientID) IngredientID {
+	if a > b {
+		return a
+	}
+
+	return b
+}
+
 func Part2() error {
 	file, err := os.Open(inputPath)
 	if err != nil {
@@ -112,7 +129,7 @@ func Part2() error {
 
 	scanner := bufio.NewScanner(file)
 
-	freshIngredients := make(map[IngredientID]bool)
+	var ranges []Range
 
 	for scanner.Scan() {
 		inputRow := scanner.Text()
@@ -136,9 +153,10 @@ func Part2() error {
 			return fmt.Errorf("invalid input for range: %s", rangeParts[1])
 		}
 
-		for i := begin; i <= end; i++ {
-			freshIngredients[IngredientID(i)] = true
-		}
+		ranges = append(ranges, Range{
+			Begin: IngredientID(begin),
+			End:   IngredientID(end),
+		})
 	}
 
 	err = scanner.Err()
@@ -146,7 +164,36 @@ func Part2() error {
 		return fmt.Errorf("error reading the file: %s", err)
 	}
 
-	fmt.Println("Day 5b:", len(freshIngredients))
+	sort.Slice(ranges, func(i, j int) bool {
+		return ranges[i].Begin < ranges[j].Begin
+	})
+
+	var mergedRanges []Range
+
+	for _, ingredientRange := range ranges {
+		merged := false
+		for i := range mergedRanges {
+			if ingredientRange.Begin <= mergedRanges[i].End+1 && ingredientRange.End >= mergedRanges[i].Begin-1 {
+				mergedRanges[i].Begin = minIngredientID(ingredientRange.Begin, mergedRanges[i].Begin)
+				mergedRanges[i].End = maxIngredientID(ingredientRange.End, mergedRanges[i].End)
+
+				merged = true
+
+				break
+			}
+		}
+
+		if !merged {
+			mergedRanges = append(mergedRanges, ingredientRange)
+		}
+	}
+
+	result := 0
+	for _, ingredientRange := range mergedRanges {
+		result += int(ingredientRange.End) - int(ingredientRange.Begin) + 1
+	}
+
+	fmt.Println("Day 5b:", result)
 
 	return nil
 }
