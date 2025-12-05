@@ -96,3 +96,57 @@ func Part1() error {
 
 	return nil
 }
+
+func Part2() error {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return fmt.Errorf("error opening file: %s", err)
+	}
+
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(file)
+
+	scanner := bufio.NewScanner(file)
+
+	freshIngredients := make(map[IngredientID]bool)
+
+	for scanner.Scan() {
+		inputRow := scanner.Text()
+
+		if inputRow == "" {
+			break
+		}
+
+		rangeParts := strings.Split(inputRow, "-")
+		if len(rangeParts) != 2 {
+			return fmt.Errorf("invalid input for range: %s", inputRow)
+		}
+
+		begin, err := strconv.Atoi(rangeParts[0])
+		if err != nil {
+			return fmt.Errorf("invalid input for range: %s", rangeParts[0])
+		}
+
+		end, err := strconv.Atoi(rangeParts[1])
+		if err != nil {
+			return fmt.Errorf("invalid input for range: %s", rangeParts[1])
+		}
+
+		for i := begin; i <= end; i++ {
+			freshIngredients[IngredientID(i)] = true
+		}
+	}
+
+	err = scanner.Err()
+	if err != nil {
+		return fmt.Errorf("error reading the file: %s", err)
+	}
+
+	fmt.Println("Day 5b:", len(freshIngredients))
+
+	return nil
+}
