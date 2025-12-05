@@ -18,9 +18,68 @@ type Range struct {
 	End   IngredientID
 }
 
-func Part1() error {
-	var result int
+func readRanges(scanner *bufio.Scanner) ([]Range, error) {
+	var ranges []Range
 
+	for scanner.Scan() {
+		inputRow := scanner.Text()
+
+		if inputRow == "" {
+			break
+		}
+
+		rangeParts := strings.Split(inputRow, "-")
+		if len(rangeParts) != 2 {
+			return nil, fmt.Errorf("invalid input for range: %s", inputRow)
+		}
+
+		begin, err := strconv.Atoi(rangeParts[0])
+		if err != nil {
+			return nil, fmt.Errorf("invalid input for range: %s", rangeParts[0])
+		}
+
+		end, err := strconv.Atoi(rangeParts[1])
+		if err != nil {
+			return nil, fmt.Errorf("invalid input for range: %s", rangeParts[1])
+		}
+
+		ranges = append(ranges, Range{
+			Begin: IngredientID(begin),
+			End:   IngredientID(end),
+		})
+	}
+
+	err := scanner.Err()
+	if err != nil {
+		return nil, fmt.Errorf("error reading the file: %s", err)
+	}
+
+	return ranges, nil
+}
+
+func readIngredients(scanner *bufio.Scanner) ([]IngredientID, error) {
+	var ingredients []IngredientID
+
+	for scanner.Scan() {
+		inputRow := scanner.Text()
+
+		id, err := strconv.Atoi(inputRow)
+		if err != nil {
+			return nil, fmt.Errorf("invalid ingredient ID: %s", inputRow)
+		}
+
+		ingredients = append(ingredients, IngredientID(id))
+	}
+
+	err := scanner.Err()
+	if err != nil {
+		return nil, fmt.Errorf("error reading the file: %s", err)
+	}
+
+	return ingredients, nil
+}
+
+func Part1() error {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return fmt.Errorf("error opening file: %s", err)
@@ -35,54 +94,17 @@ func Part1() error {
 
 	scanner := bufio.NewScanner(file)
 
-	var ranges []Range
-
-	for scanner.Scan() {
-		inputRow := scanner.Text()
-
-		if inputRow == "" {
-			break
-		}
-
-		rangeParts := strings.Split(inputRow, "-")
-		if len(rangeParts) != 2 {
-			return fmt.Errorf("invalid input for range: %s", inputRow)
-		}
-
-		begin, err := strconv.Atoi(rangeParts[0])
-		if err != nil {
-			return fmt.Errorf("invalid input for range: %s", rangeParts[0])
-		}
-
-		end, err := strconv.Atoi(rangeParts[1])
-		if err != nil {
-			return fmt.Errorf("invalid input for range: %s", rangeParts[1])
-		}
-
-		ranges = append(ranges, Range{
-			Begin: IngredientID(begin),
-			End:   IngredientID(end),
-		})
-	}
-
-	var ingredients []IngredientID
-
-	for scanner.Scan() {
-		inputRow := scanner.Text()
-
-		id, err := strconv.Atoi(inputRow)
-		if err != nil {
-			return fmt.Errorf("invalid ingredient ID: %s", inputRow)
-		}
-
-		ingredients = append(ingredients, IngredientID(id))
-	}
-
-	err = scanner.Err()
+	ranges, err := readRanges(scanner)
 	if err != nil {
-		return fmt.Errorf("error reading the file: %s", err)
+		return err
 	}
 
+	ingredients, err := readIngredients(scanner)
+	if err != nil {
+		return err
+	}
+
+	result := 0
 	for _, ingredient := range ingredients {
 		for _, ingredientRange := range ranges {
 			if ingredient >= ingredientRange.Begin && ingredient <= ingredientRange.End {
@@ -129,39 +151,9 @@ func Part2() error {
 
 	scanner := bufio.NewScanner(file)
 
-	var ranges []Range
-
-	for scanner.Scan() {
-		inputRow := scanner.Text()
-
-		if inputRow == "" {
-			break
-		}
-
-		rangeParts := strings.Split(inputRow, "-")
-		if len(rangeParts) != 2 {
-			return fmt.Errorf("invalid input for range: %s", inputRow)
-		}
-
-		begin, err := strconv.Atoi(rangeParts[0])
-		if err != nil {
-			return fmt.Errorf("invalid input for range: %s", rangeParts[0])
-		}
-
-		end, err := strconv.Atoi(rangeParts[1])
-		if err != nil {
-			return fmt.Errorf("invalid input for range: %s", rangeParts[1])
-		}
-
-		ranges = append(ranges, Range{
-			Begin: IngredientID(begin),
-			End:   IngredientID(end),
-		})
-	}
-
-	err = scanner.Err()
+	ranges, err := readRanges(scanner)
 	if err != nil {
-		return fmt.Errorf("error reading the file: %s", err)
+		return err
 	}
 
 	sort.Slice(ranges, func(i, j int) bool {
@@ -169,7 +161,6 @@ func Part2() error {
 	})
 
 	var mergedRanges []Range
-
 	for _, ingredientRange := range ranges {
 		merged := false
 		for i := range mergedRanges {
