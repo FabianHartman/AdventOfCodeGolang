@@ -7,6 +7,7 @@ import (
 	"adventOfCode/solutions/2025/day3"
 	"adventOfCode/solutions/2025/day4"
 	"adventOfCode/solutions/2025/day5"
+	"adventOfCode/solutions/2025/day6"
 )
 
 func main() {
@@ -20,4 +21,5 @@ func main() {
 	runner.Run(day4.Part2)
 	runner.Run(day5.Part1)
 	runner.Run(day5.Part2)
+	runner.Run(day6.Part1)
 }
