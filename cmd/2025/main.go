@@ -26,4 +26,5 @@ func main() {
 	runner.Run(day6.Part1)
 	runner.Run(day6.Part2)
 	runner.Run(day7.Part1)
+	runner.Run(day7.Part2)
 }
