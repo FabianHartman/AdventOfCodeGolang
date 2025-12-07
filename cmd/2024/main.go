@@ -2,6 +2,7 @@ package main
 
 import (
 	"adventOfCode/helper/runner"
+
 	"adventOfCode/solutions/2024/day1"
 	"adventOfCode/solutions/2024/day10"
 	"adventOfCode/solutions/2024/day11"

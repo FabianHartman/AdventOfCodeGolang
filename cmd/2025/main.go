@@ -2,12 +2,14 @@ package main
 
 import (
 	"adventOfCode/helper/runner"
+
 	"adventOfCode/solutions/2025/day1"
 	"adventOfCode/solutions/2025/day2"
 	"adventOfCode/solutions/2025/day3"
 	"adventOfCode/solutions/2025/day4"
 	"adventOfCode/solutions/2025/day5"
 	"adventOfCode/solutions/2025/day6"
+	"adventOfCode/solutions/2025/day7"
 )
 
 func main() {
@@ -23,4 +25,5 @@ func main() {
 	runner.Run(day5.Part2)
 	runner.Run(day6.Part1)
 	runner.Run(day6.Part2)
+	runner.Run(day7.Part1)
 }
