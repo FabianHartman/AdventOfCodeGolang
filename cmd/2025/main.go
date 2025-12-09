@@ -1,6 +1,7 @@
 package main
 
 import (
+	"adventOfCode/solutions/2025/day9"
 	"fmt"
 
 	"adventOfCode/helper/runner"
@@ -36,6 +37,8 @@ func runAll() error {
 	runner.Run(day7.Part2)
 	runner.Run(day8.Part1)
 	runner.Run(day8.Part2)
+	runner.Run(day9.Part1)
+	runner.Run(day9.Part2)
 
 	fmt.Print("\n\n2025 ")
 
