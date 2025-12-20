@@ -16,6 +16,7 @@ import (
 	"adventOfCode/solutions/2025/day9"
 
 	"adventOfCode/solutions/2025/day10"
+	"adventOfCode/solutions/2025/day11"
 )
 
 func main() {
@@ -43,6 +44,8 @@ func runAll() error {
 	runner.Run(day9.Part2)
 	runner.Run(day10.Part1)
 	runner.Run(day10.Part2)
+	runner.Run(day11.Part1)
+	runner.Run(day11.Part2)
 
 	fmt.Print("\n\n2025 ")
 
